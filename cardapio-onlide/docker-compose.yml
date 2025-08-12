@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Frontend React
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+  # Backend Node.js
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_USER=cardapio_user
+      - DB_PASSWORD=cardapio_pass
+      - DB_NAME=cardapio_db
+      - JWT_SECRET=dev-jwt-secret-123
+    depends_on:
+      - mysql
+
+  # Banco MySQL
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: cardapio_db
+      MYSQL_USER: cardapio_user
+      MYSQL_PASSWORD: cardapio_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Interface do Banco
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: cardapio_user
+      PMA_PASSWORD: cardapio_pass
+    depends_on:
+      - mysql
+
+  # Cache Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # DevOps Tools
+  terraform:
+    image: hashicorp/terraform:1.5
+    volumes:
+      - ./infrastructure/terraform:/workspace
+    working_dir: /workspace
+    command: sleep infinity
+
+  ansible:
+    image: cytopia/ansible:latest
+    volumes:
+      - ./infrastructure/ansible:/workspace
+    working_dir: /workspace
+    command: sleep infinity
+
+volumes:
+  mysql_data:

@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar package.json
+COPY package*.json ./
+
+# Instalar dependências
+RUN npm install
+RUN npm install -g nodemon
+
+# Copiar código fonte
+COPY . .
+
+EXPOSE 3001
+
+CMD ["npm", "run", "dev"]
