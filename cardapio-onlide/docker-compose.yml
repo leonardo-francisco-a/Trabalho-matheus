@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Frontend React
@@ -42,7 +41,7 @@ services:
   mysql:
     image: mysql:8.0
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: cardapio_db
@@ -76,14 +75,14 @@ services:
     volumes:
       - ./infrastructure/terraform:/workspace
     working_dir: /workspace
-    command: sleep infinity
+    entrypoint: ["tail", "-f", "/dev/null"]
 
   ansible:
     image: cytopia/ansible:latest
     volumes:
       - ./infrastructure/ansible:/workspace
     working_dir: /workspace
-    command: sleep infinity
+    entrypoint: ["tail", "-f", "/dev/null"]
 
 volumes:
   mysql_data:
