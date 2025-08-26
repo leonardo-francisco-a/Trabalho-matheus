@@ -1,3 +1,4 @@
+version: '3.8'
 
 services:
   # Frontend React
@@ -13,8 +14,13 @@ services:
     environment:
       - REACT_APP_API_URL=http://localhost:3001
       - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+    networks:
+      - cardapio-network
+    restart: unless-stopped
 
   # Backend Node.js
   backend:
@@ -35,7 +41,11 @@ services:
       - DB_NAME=cardapio_db
       - JWT_SECRET=dev-jwt-secret-123
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    networks:
+      - cardapio-network
+    restart: unless-stopped
 
   # Banco MySQL
   mysql:
@@ -50,6 +60,15 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cardapio-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cardapio_user", "-pcardapio_pass"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
 
   # Interface do Banco
   phpmyadmin:
@@ -60,14 +79,22 @@ services:
       PMA_HOST: mysql
       PMA_USER: cardapio_user
       PMA_PASSWORD: cardapio_pass
+      PMA_ARBITRARY: 1
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    networks:
+      - cardapio-network
+    restart: unless-stopped
 
   # Cache Redis
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    networks:
+      - cardapio-network
+    restart: unless-stopped
 
   # DevOps Tools
   terraform:
@@ -76,6 +103,8 @@ services:
       - ./infrastructure/terraform:/workspace
     working_dir: /workspace
     entrypoint: ["tail", "-f", "/dev/null"]
+    networks:
+      - cardapio-network
 
   ansible:
     image: cytopia/ansible:latest
@@ -83,6 +112,13 @@ services:
       - ./infrastructure/ansible:/workspace
     working_dir: /workspace
     entrypoint: ["tail", "-f", "/dev/null"]
+    networks:
+      - cardapio-network
 
 volumes:
   mysql_data:
+    driver: local
+
+networks:
+  cardapio-network:
+    driver: bridge
