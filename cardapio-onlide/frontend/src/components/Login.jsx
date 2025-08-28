@@ -1,74 +1,64 @@
-import { useState } from 'react'
-import './Login.css'
+import { useState } from 'react';
+import './Login.css';
+import LoadingSpinner from './LoadingSpinner';
 
-function Login({ onLogin, onSwitchToRegister }) {
+function Login({ onLogin, onSwitchToRegister, loading }) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
-  })
-  const [errors, setErrors] = useState({})
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
+    }));
+    
+    // Limpar erro do campo quando usuário digita
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
-      }))
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
     
     if (!formData.email) {
-      newErrors.email = 'Email é obrigatório'
+      newErrors.email = 'Email é obrigatório';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido'
+      newErrors.email = 'Email inválido';
     }
     
     if (!formData.password) {
-      newErrors.password = 'Senha é obrigatória'
+      newErrors.password = 'Senha é obrigatória';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Senha deve ter pelo menos 6 caracteres'
+      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
     }
     
-    return newErrors
-  }
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const newErrors = validateForm()
+    e.preventDefault();
     
+    const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
+      setErrors(newErrors);
+      return;
     }
     
-    setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      if (formData.email === 'admin@gmail.com' && formData.password === 'admin123') {
-        onLogin({
-          email: formData.email,
-          name: 'Administrador',
-          role: 'admin'
-        })
-      } else {
-        setErrors({ general: 'Email ou senha incorretos. Use: admin@gmail.com / admin123' })
-      }
+      await onLogin(formData.email, formData.password);
     } catch (error) {
-      setErrors({ general: 'Erro ao fazer login. Tente novamente.' })
-    } finally {
-      setIsLoading(false)
+      // Error is handled by context/toast
+      console.error('Login error:', error);
     }
-  }
+  };
 
   return (
     <div className="login-container">
@@ -79,12 +69,6 @@ function Login({ onLogin, onSwitchToRegister }) {
         </div>
         
         <form onSubmit={handleSubmit} className="login-form">
-          {errors.general && (
-            <div className="error-message general-error">
-              {errors.general}
-            </div>
-          )}
-          
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -95,6 +79,7 @@ function Login({ onLogin, onSwitchToRegister }) {
               onChange={handleChange}
               className={errors.email ? 'error' : ''}
               placeholder="Digite seu email"
+              disabled={loading}
             />
             {errors.email && (
               <span className="error-message">{errors.email}</span>
@@ -111,6 +96,7 @@ function Login({ onLogin, onSwitchToRegister }) {
               onChange={handleChange}
               className={errors.password ? 'error' : ''}
               placeholder="Digite sua senha"
+              disabled={loading}
             />
             {errors.password && (
               <span className="error-message">{errors.password}</span>
@@ -120,9 +106,16 @@ function Login({ onLogin, onSwitchToRegister }) {
           <button 
             type="submit" 
             className="login-button"
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? 'Entrando...' : 'Entrar'}
+            {loading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <LoadingSpinner size="small" />
+                <span style={{ marginLeft: '8px' }}>Entrando...</span>
+              </div>
+            ) : (
+              'Entrar'
+            )}
           </button>
         </form>
         
@@ -133,14 +126,21 @@ function Login({ onLogin, onSwitchToRegister }) {
               type="button" 
               className="link-button"
               onClick={onSwitchToRegister}
+              disabled={loading}
             >
               Cadastre-se
             </button>
           </p>
         </div>
+        
+        <div className="demo-info">
+          <h4>👨‍💻 Demo - Dados para teste:</h4>
+          <p>Email: <strong>admin@cardapio.com</strong></p>
+          <p>Senha: <strong>admin123</strong></p>
+        </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;
