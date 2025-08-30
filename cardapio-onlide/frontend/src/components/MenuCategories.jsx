@@ -1,24 +1,33 @@
 import './MenuCategories.css'
 
-const MenuCategories = ({ selectedCategory, onCategorySelect }) => {
-  const categories = [
-    { id: 'all', name: 'Todos', icon: '🍽️' },
-    { id: 1, name: 'Lanches', icon: '🍔' },
-    { id: 2, name: 'Pizzas', icon: '🍕' },
-    { id: 3, name: 'Bebidas', icon: '🥤' },
-    { id: 4, name: 'Sobremesas', icon: '🍰' }
-  ]
+const MenuCategories = ({ categorias = [], selectedCategory, onCategorySelect }) => {
+  const categoryIcons = {
+    'all': '🍽️',
+    'Todos': '🍽️',
+    'Lanches': '🍔',
+    'Pizzas': '🍕',
+    'Bebidas': '🥤',
+    'Sobremesas': '🍰',
+    1: '🍔',
+    2: '🍕',
+    3: '🥤',
+    4: '🍰'
+  }
+
+  const getIcon = (category) => {
+    return categoryIcons[category.id] || categoryIcons[category.nome] || '🍽️'
+  }
 
   return (
     <div className="menu-categories">
-      {categories.map((category) => (
+      {categorias.map((category) => (
         <div
           key={category.id}
           className={`category-item ${selectedCategory?.id === category.id ? 'active' : ''}`}
           onClick={() => onCategorySelect(category)}
         >
-          <div className="category-icon">{category.icon}</div>
-          <span className="category-name">{category.name}</span>
+          <div className="category-icon">{getIcon(category)}</div>
+          <span className="category-name">{category.nome}</span>
         </div>
       ))}
     </div>
