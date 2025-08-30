@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { authService } from '../services/api';
+import { authService, cardapioService, pedidosService } from '../services/api';
 import toast from 'react-hot-toast';
 
 // Estados iniciais
@@ -16,7 +16,7 @@ const initialState = {
   // Produtos e categorias
   produtos: [],
   categorias: [],
-  selectedCategory: null,
+  selectedCategory: { id: 'all', nome: 'Todos' },
   
   // Carrinho
   cartItems: [],
@@ -55,10 +55,7 @@ const ActionTypes = {
 function appReducer(state, action) {
   switch (action.type) {
     case ActionTypes.SET_AUTH_LOADING:
-      return {
-        ...state,
-        authLoading: action.payload
-      };
+      return { ...state, authLoading: action.payload };
       
     case ActionTypes.LOGIN_SUCCESS:
       return {
@@ -72,43 +69,24 @@ function appReducer(state, action) {
       
     case ActionTypes.LOGOUT:
       return {
-        ...state,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-        cartItems: [],
-        currentView: 'login'
+        ...initialState,
+        authLoading: false
       };
       
     case ActionTypes.SET_USER:
-      return {
-        ...state,
-        user: action.payload
-      };
+      return { ...state, user: action.payload };
       
     case ActionTypes.SET_LOADING:
-      return {
-        ...state,
-        loading: action.payload
-      };
+      return { ...state, loading: action.payload };
       
     case ActionTypes.SET_PRODUTOS:
-      return {
-        ...state,
-        produtos: action.payload
-      };
+      return { ...state, produtos: action.payload };
       
     case ActionTypes.SET_CATEGORIAS:
-      return {
-        ...state,
-        categorias: action.payload
-      };
+      return { ...state, categorias: action.payload };
       
     case ActionTypes.SET_SELECTED_CATEGORY:
-      return {
-        ...state,
-        selectedCategory: action.payload
-      };
+      return { ...state, selectedCategory: action.payload };
       
     case ActionTypes.ADD_TO_CART:
       const existingItem = state.cartItems.find(item => item.id === action.payload.id);
@@ -128,6 +106,12 @@ function appReducer(state, action) {
       };
       
     case ActionTypes.UPDATE_CART_ITEM:
+      if (action.payload.quantity <= 0) {
+        return {
+          ...state,
+          cartItems: state.cartItems.filter(item => item.id !== action.payload.id)
+        };
+      }
       return {
         ...state,
         cartItems: state.cartItems.map(item =>
@@ -144,16 +128,10 @@ function appReducer(state, action) {
       };
       
     case ActionTypes.CLEAR_CART:
-      return {
-        ...state,
-        cartItems: []
-      };
+      return { ...state, cartItems: [] };
       
     case ActionTypes.SET_CURRENT_VIEW:
-      return {
-        ...state,
-        currentView: action.payload
-      };
+      return { ...state, currentView: action.payload };
       
     default:
       return state;
@@ -175,17 +153,14 @@ export function AppProvider({ children }) {
       
       if (token && userData) {
         try {
-          // Validar token com backend
-          const response = await authService.me();
+          // Se temos dados salvos, usá-los imediatamente
+          const user = JSON.parse(userData);
           dispatch({
             type: ActionTypes.LOGIN_SUCCESS,
-            payload: {
-              token,
-              user: response.usuario
-            }
+            payload: { token, user }
           });
         } catch (error) {
-          // Token inválido, limpar dados
+          console.error('Erro ao recuperar dados salvos:', error);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           dispatch({ type: ActionTypes.SET_AUTH_LOADING, payload: false });
@@ -201,25 +176,38 @@ export function AppProvider({ children }) {
   // Actions
   const actions = {
     // Auth actions
-    login: async (email, password) => {
+    login: async (email, senha) => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-        const response = await authService.login(email, password);
         
-        // Salvar no localStorage
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.usuario));
-        
-        dispatch({
-          type: ActionTypes.LOGIN_SUCCESS,
-          payload: {
-            token: response.token,
-            user: response.usuario
-          }
-        });
-        
-        toast.success('Login realizado com sucesso!');
-        return response;
+        // Mock login para desenvolvimento
+        if (email === 'admin@cardapio.com' && senha === 'admin123') {
+          const mockResponse = {
+            token: 'mock-jwt-token-123',
+            usuario: {
+              id: 1,
+              nome: 'Administrador',
+              email: 'admin@cardapio.com',
+              tipo: 'admin'
+            }
+          };
+          
+          localStorage.setItem('token', mockResponse.token);
+          localStorage.setItem('user', JSON.stringify(mockResponse.usuario));
+          
+          dispatch({
+            type: ActionTypes.LOGIN_SUCCESS,
+            payload: {
+              token: mockResponse.token,
+              user: mockResponse.usuario
+            }
+          });
+          
+          toast.success('Login realizado com sucesso!');
+          return mockResponse;
+        } else {
+          throw { error: 'Credenciais inválidas. Use: admin@cardapio.com / admin123' };
+        }
       } catch (error) {
         toast.error(error.error || 'Erro ao fazer login');
         throw error;
@@ -231,29 +219,33 @@ export function AppProvider({ children }) {
     register: async (userData) => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-        const response = await authService.register(
-          userData.name,
-          userData.email, 
-          userData.password,
-          userData.telefone
-        );
         
-        // Salvar no localStorage
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.usuario));
+        // Mock register para desenvolvimento
+        const mockResponse = {
+          token: 'mock-jwt-token-456',
+          usuario: {
+            id: 2,
+            nome: userData.name,
+            email: userData.email,
+            tipo: 'admin'
+          }
+        };
+        
+        localStorage.setItem('token', mockResponse.token);
+        localStorage.setItem('user', JSON.stringify(mockResponse.usuario));
         
         dispatch({
           type: ActionTypes.LOGIN_SUCCESS,
           payload: {
-            token: response.token,
-            user: response.usuario
+            token: mockResponse.token,
+            user: mockResponse.usuario
           }
         });
         
         toast.success('Conta criada com sucesso!');
-        return response;
+        return mockResponse;
       } catch (error) {
-        toast.error(error.error || 'Erro ao criar conta');
+        toast.error('Erro ao criar conta');
         throw error;
       } finally {
         dispatch({ type: ActionTypes.SET_LOADING, payload: false });
@@ -267,18 +259,123 @@ export function AppProvider({ children }) {
       toast.success('Logout realizado com sucesso!');
     },
     
+    // Carregar dados iniciais
+    loadInitialData: async () => {
+      try {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+        
+        // Tentar carregar dados reais da API
+        try {
+          // Carregar categorias da API
+          const categoriasResponse = await cardapioService.listarCategorias();
+          let categorias = categoriasResponse || [];
+          
+          // Adicionar categoria "Todos" se não existir
+          if (!categorias.find(cat => cat.id === 'all')) {
+            categorias = [{ id: 'all', nome: 'Todos' }, ...categorias];
+          }
+          
+          // Carregar produtos da API
+          const produtosResponse = await cardapioService.listarItens();
+          const produtos = produtosResponse?.itens || [];
+          
+          dispatch({ type: ActionTypes.SET_CATEGORIAS, payload: categorias });
+          dispatch({ type: ActionTypes.SET_PRODUTOS, payload: produtos });
+          
+          console.log('✅ Dados carregados da API:', { categorias: categorias.length, produtos: produtos.length });
+          
+        } catch (apiError) {
+          console.warn('⚠️ API indisponível, usando dados mockados:', apiError.message);
+          
+          // Fallback para dados mockados
+          const categorias = [
+            { id: 'all', nome: 'Todos' },
+            { id: 1, nome: 'Lanches' },
+            { id: 2, nome: 'Pizzas' },
+            { id: 3, nome: 'Bebidas' },
+            { id: 4, nome: 'Sobremesas' }
+          ];
+          
+          const produtos = [
+            {
+              id: 1,
+              nome: 'X-Burger Clássico',
+              descricao: 'Hambúrguer com carne 180g, queijo, alface, tomate e maionese',
+              preco: 18.90,
+              categoria_id: 1,
+              disponivel: true,
+              tempo_preparo: 15,
+              categoria: { id: 1, nome: 'Lanches' }
+            },
+            {
+              id: 2,
+              nome: 'Pizza Margherita',
+              descricao: 'Molho de tomate, mussarela de búfala e manjericão fresco',
+              preco: 35.00,
+              categoria_id: 2,
+              disponivel: true,
+              tempo_preparo: 25,
+              categoria: { id: 2, nome: 'Pizzas' }
+            },
+            {
+              id: 3,
+              nome: 'Coca-Cola 350ml',
+              descricao: 'Refrigerante gelado',
+              preco: 5.00,
+              categoria_id: 3,
+              disponivel: true,
+              tempo_preparo: 2,
+              categoria: { id: 3, nome: 'Bebidas' }
+            },
+            {
+              id: 4,
+              nome: 'Pudim de Leite',
+              descricao: 'Pudim caseiro com calda de caramelo',
+              preco: 8.50,
+              categoria_id: 4,
+              disponivel: true,
+              tempo_preparo: 5,
+              categoria: { id: 4, nome: 'Sobremesas' }
+            },
+            {
+              id: 5,
+              nome: 'Pizza Portuguesa',
+              descricao: 'Presunto, ovos, cebola, azeitona e mussarela',
+              preco: 42.00,
+              categoria_id: 2,
+              disponivel: true,
+              tempo_preparo: 25,
+              categoria: { id: 2, nome: 'Pizzas' }
+            },
+            {
+              id: 6,
+              nome: 'X-Bacon Especial',
+              descricao: 'Hambúrguer com carne 180g, bacon crocante, queijo e salada',
+              preco: 22.50,
+              categoria_id: 1,
+              disponivel: true,
+              tempo_preparo: 18,
+              categoria: { id: 1, nome: 'Lanches' }
+            }
+          ];
+          
+          dispatch({ type: ActionTypes.SET_CATEGORIAS, payload: categorias });
+          dispatch({ type: ActionTypes.SET_PRODUTOS, payload: produtos });
+          
+          toast.error('Usando dados de demonstração (backend offline)');
+        }
+        
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        toast.error('Erro ao carregar dados');
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+      }
+    },
+    
     // UI actions
     setCurrentView: (view) => {
       dispatch({ type: ActionTypes.SET_CURRENT_VIEW, payload: view });
-    },
-    
-    // Produtos actions
-    setProdutos: (produtos) => {
-      dispatch({ type: ActionTypes.SET_PRODUTOS, payload: produtos });
-    },
-    
-    setCategorias: (categorias) => {
-      dispatch({ type: ActionTypes.SET_CATEGORIAS, payload: categorias });
     },
     
     setSelectedCategory: (category) => {
@@ -292,14 +389,10 @@ export function AppProvider({ children }) {
     },
     
     updateCartItem: (id, quantity) => {
-      if (quantity <= 0) {
-        dispatch({ type: ActionTypes.REMOVE_FROM_CART, payload: id });
-      } else {
-        dispatch({ 
-          type: ActionTypes.UPDATE_CART_ITEM, 
-          payload: { id, quantity } 
-        });
-      }
+      dispatch({ 
+        type: ActionTypes.UPDATE_CART_ITEM, 
+        payload: { id, quantity } 
+      });
     },
     
     removeFromCart: (id) => {
@@ -309,11 +402,57 @@ export function AppProvider({ children }) {
     
     clearCart: () => {
       dispatch({ type: ActionTypes.CLEAR_CART });
+      toast.success('Carrinho limpo');
     },
     
-    // Utility
-    setLoading: (loading) => {
-      dispatch({ type: ActionTypes.SET_LOADING, payload: loading });
+    placeOrder: async (orderData) => {
+      try {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+        
+        // Tentar criar pedido via API
+        try {
+          const response = await pedidosService.criarPedido({
+            cliente_nome: orderData.cliente_nome,
+            cliente_telefone: orderData.cliente_telefone,
+            endereco_entrega: orderData.endereco_entrega,
+            tipo_entrega: orderData.tipo_entrega,
+            observacoes: orderData.observacoes || '',
+            itens: orderData.itens
+          });
+          
+          dispatch({ type: ActionTypes.CLEAR_CART });
+          toast.success(`Pedido ${response.pedido.numero_pedido} criado com sucesso!`);
+          
+          return response.pedido;
+          
+        } catch (apiError) {
+          console.warn('⚠️ API indisponível para criar pedido, simulando:', apiError.message);
+          
+          // Fallback para simulação
+          const numeroPedido = `PED${Date.now().toString().slice(-6)}`;
+          const total = state.cartItems.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
+          
+          console.log('🍽️ Pedido simulado criado:', {
+            numero: numeroPedido,
+            cliente: orderData.cliente_nome,
+            itens: state.cartItems.length,
+            total: total.toFixed(2),
+            tipo: orderData.tipo_entrega
+          });
+          
+          dispatch({ type: ActionTypes.CLEAR_CART });
+          toast.success(`Pedido ${numeroPedido} criado com sucesso! (modo demo)`);
+          
+          return { numero_pedido: numeroPedido, total };
+        }
+        
+      } catch (error) {
+        console.error('Erro ao criar pedido:', error);
+        toast.error('Erro ao criar pedido');
+        throw error;
+      } finally {
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+      }
     }
   };
   

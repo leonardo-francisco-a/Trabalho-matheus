@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // Configuração base do axios
 const api = axios.create({
-  baseURL: import.meta.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -17,21 +17,36 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log(`🔄 ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('❌ Request error:', error);
+    return Promise.reject(error);
+  }
 );
 
 // Interceptor para tratar respostas
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
+    return response;
+  },
   (error) => {
+    console.error(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url} - ${error.response?.status || 'Network Error'}`);
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.reload();
       toast.error('Sessão expirada. Faça login novamente.');
     }
+    
+    // Se for erro de rede, mostrar mensagem mais amigável
+    if (!error.response) {
+      toast.error('Erro de conexão. Verifique se o backend está rodando.');
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -75,10 +90,11 @@ export const authService = {
 export const cardapioService = {
   listarItens: async (categoria_id = null) => {
     try {
-      const params = categoria_id ? { categoria_id } : {};
+      const params = categoria_id && categoria_id !== 'all' ? { categoria_id } : {};
       const response = await api.get('/cardapio', { params });
       return response.data;
     } catch (error) {
+      console.error('Erro ao carregar cardápio:', error);
       throw error.response?.data || { error: 'Erro ao carregar cardápio' };
     }
   },
@@ -97,6 +113,7 @@ export const cardapioService = {
       const response = await api.get('/cardapio/categorias');
       return response.data;
     } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
       throw error.response?.data || { error: 'Erro ao carregar categorias' };
     }
   }
@@ -109,6 +126,7 @@ export const pedidosService = {
       const response = await api.post('/pedidos', pedidoData);
       return response.data;
     } catch (error) {
+      console.error('Erro ao criar pedido:', error);
       throw error.response?.data || { error: 'Erro ao criar pedido' };
     }
   },
@@ -163,6 +181,18 @@ export const dashboardService = {
     } catch (error) {
       throw error.response?.data || { error: 'Erro ao carregar relatório' };
     }
+  }
+};
+
+// ==================== UTILS ====================
+export const testConnection = async () => {
+  try {
+    const response = await api.get('/health');
+    console.log('🟢 Backend conectado:', response.data);
+    return true;
+  } catch (error) {
+    console.error('🔴 Backend não conectado:', error.message);
+    return false;
   }
 };
 
