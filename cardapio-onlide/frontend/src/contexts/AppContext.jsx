@@ -139,7 +139,7 @@ function appReducer(state, action) {
 }
 
 // Context
-const AppContext = createContext();
+const AppContext = createContext(null);
 
 // Provider
 export function AppProvider({ children }) {
@@ -175,12 +175,32 @@ export function AppProvider({ children }) {
   
   // Actions
   const actions = {
-    // Auth actions
+    // Auth actions - CORRIGIDO para usar API real
     login: async (email, senha) => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
         
-        // Mock login para desenvolvimento
+        // USAR API REAL em vez de mock
+        const response = await authService.login(email, senha);
+        
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.usuario));
+        
+        dispatch({
+          type: ActionTypes.LOGIN_SUCCESS,
+          payload: {
+            token: response.token,
+            user: response.usuario
+          }
+        });
+        
+        toast.success('Login realizado com sucesso!');
+        return response;
+        
+      } catch (error) {
+        // Fallback para mock apenas se API falhar
+        console.warn('⚠️ API falhou, tentando mock:', error.message);
+        
         if (email === 'admin@cardapio.com' && senha === 'admin123') {
           const mockResponse = {
             token: 'mock-jwt-token-123',
@@ -203,14 +223,12 @@ export function AppProvider({ children }) {
             }
           });
           
-          toast.success('Login realizado com sucesso!');
+          toast.success('Login realizado com sucesso! (modo demo)');
           return mockResponse;
         } else {
-          throw { error: 'Credenciais inválidas. Use: admin@cardapio.com / admin123' };
+          toast.error(error.error || 'Credenciais inválidas');
+          throw error;
         }
-      } catch (error) {
-        toast.error(error.error || 'Erro ao fazer login');
-        throw error;
       } finally {
         dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
@@ -220,32 +238,30 @@ export function AppProvider({ children }) {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
         
-        // Mock register para desenvolvimento
-        const mockResponse = {
-          token: 'mock-jwt-token-456',
-          usuario: {
-            id: 2,
-            nome: userData.name,
-            email: userData.email,
-            tipo: 'admin'
-          }
-        };
+        // USAR API REAL em vez de mock
+        const response = await authService.register(
+          userData.name, 
+          userData.email, 
+          userData.password, 
+          userData.telefone
+        );
         
-        localStorage.setItem('token', mockResponse.token);
-        localStorage.setItem('user', JSON.stringify(mockResponse.usuario));
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.usuario));
         
         dispatch({
           type: ActionTypes.LOGIN_SUCCESS,
           payload: {
-            token: mockResponse.token,
-            user: mockResponse.usuario
+            token: response.token,
+            user: response.usuario
           }
         });
         
         toast.success('Conta criada com sucesso!');
-        return mockResponse;
+        return response;
+        
       } catch (error) {
-        toast.error('Erro ao criar conta');
+        toast.error(error.error || 'Erro ao criar conta');
         throw error;
       } finally {
         dispatch({ type: ActionTypes.SET_LOADING, payload: false });
@@ -336,26 +352,6 @@ export function AppProvider({ children }) {
               disponivel: true,
               tempo_preparo: 5,
               categoria: { id: 4, nome: 'Sobremesas' }
-            },
-            {
-              id: 5,
-              nome: 'Pizza Portuguesa',
-              descricao: 'Presunto, ovos, cebola, azeitona e mussarela',
-              preco: 42.00,
-              categoria_id: 2,
-              disponivel: true,
-              tempo_preparo: 25,
-              categoria: { id: 2, nome: 'Pizzas' }
-            },
-            {
-              id: 6,
-              nome: 'X-Bacon Especial',
-              descricao: 'Hambúrguer com carne 180g, bacon crocante, queijo e salada',
-              preco: 22.50,
-              categoria_id: 1,
-              disponivel: true,
-              tempo_preparo: 18,
-              categoria: { id: 1, nome: 'Lanches' }
             }
           ];
           
@@ -463,7 +459,7 @@ export function AppProvider({ children }) {
   );
 }
 
-// Hook para usar o contexto
+// Hook personalizado para usar o contexto
 export function useApp() {
   const context = useContext(AppContext);
   if (!context) {
@@ -472,4 +468,5 @@ export function useApp() {
   return context;
 }
 
+// Exportação padrão
 export default AppContext;

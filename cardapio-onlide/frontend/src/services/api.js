@@ -17,7 +17,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log(`🔄 ${config.method?.toUpperCase()} ${config.url}`);
+    console.log(`🔄 ${config.method?.toUpperCase()} ${config.url}`, config.data);
     return config;
   },
   (error) => {
@@ -34,6 +34,7 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url} - ${error.response?.status || 'Network Error'}`);
+    console.error('Error details:', error.response?.data);
     
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
@@ -64,14 +65,25 @@ export const authService = {
 
   register: async (nome, email, senha, telefone) => {
     try {
-      const response = await api.post('/auth/register', {
+      console.log('📝 Tentando registrar:', { nome, email, telefone });
+      
+      const requestData = {
         nome,
         email, 
-        senha,
-        telefone
-      });
+        senha
+      };
+      
+      // Adicionar telefone apenas se fornecido
+      if (telefone && telefone.trim()) {
+        requestData.telefone = telefone;
+      }
+      
+      console.log('📝 Dados enviados:', requestData);
+      
+      const response = await api.post('/auth/register', requestData);
       return response.data;
     } catch (error) {
+      console.error('❌ Erro no registro:', error.response?.data);
       throw error.response?.data || { error: 'Erro ao criar conta' };
     }
   },
