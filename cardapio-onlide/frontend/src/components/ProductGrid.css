@@ -1,238 +1,265 @@
-import React, { useState, useMemo } from 'react';
-import ProductModal from './ProductModal';
-import './ProductGrid.css';
+/* Category Header */
+.category-header {
+  margin-bottom: 24px;
+}
 
-const ProductGrid = ({ 
-  produtos = [], 
-  selectedCategory, 
-  onAddToCart, 
-  loading,
-  searchTerm = '',
-  filters = {}
-}) => {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+.category-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
 
-  const productIcons = {
-    'Lanches': '🍔',
-    'Pizzas': '🍕', 
-    'Bebidas': '🥤',
-    'Sobremesas': '🍰',
-    'Pratos Principais': '🍽️'
-  };
+/* Product Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
 
-  // Função para filtrar e buscar produtos
-  const filteredProducts = useMemo(() => {
-    let filtered = produtos;
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
 
-    // Filtrar por categoria
-    if (selectedCategory?.id !== 'all' && selectedCategory?.nome !== 'Todos') {
-      filtered = filtered.filter(produto => produto.categoria_id === selectedCategory?.id);
-    }
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
 
-    // Filtrar por termo de busca
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(produto => 
-        produto.nome.toLowerCase().includes(term) ||
-        produto.descricao?.toLowerCase().includes(term) ||
-        produto.categoria?.nome.toLowerCase().includes(term)
-      );
-    }
+.product-image {
+  height: 160px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
 
-    // Aplicar filtros avançados
-    if (filters.disponivel && filters.disponivel !== 'all') {
-      const isAvailable = filters.disponivel === 'true';
-      filtered = filtered.filter(produto => produto.disponivel === isAvailable);
-    }
+.product-emoji {
+  font-size: 48px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
 
-    if (filters.categoria && filters.categoria !== 'all') {
-      filtered = filtered.filter(produto => 
-        produto.categoria?.nome === filters.categoria
-      );
-    }
+.unavailable-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
 
-    if (filters.precoMin && !isNaN(parseFloat(filters.precoMin))) {
-      const minPrice = parseFloat(filters.precoMin);
-      filtered = filtered.filter(produto => produto.preco >= minPrice);
-    }
+.product-info {
+  padding: 16px;
+}
 
-    if (filters.precoMax && !isNaN(parseFloat(filters.precoMax))) {
-      const maxPrice = parseFloat(filters.precoMax);
-      filtered = filtered.filter(produto => produto.preco <= maxPrice);
-    }
+.product-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+  height: 44px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-    // Ordenar por nome
-    return filtered.sort((a, b) => a.nome.localeCompare(b.nome));
-  }, [produtos, selectedCategory, searchTerm, filters]);
+.product-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+  height: 32px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(price);
-  };
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
 
-  const getProductIcon = (produto) => {
-    const categoryName = produto.categoria?.nome || 'Lanches';
-    return productIcons[categoryName] || '🍽️';
-  };
+.product-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-  const handleProductClick = (produto) => {
-    setSelectedProduct(produto);
-    setIsModalOpen(true);
-  };
+.product-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #667eea;
+}
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(null);
-  };
+.prep-time {
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
-  const getCategoryTitle = () => {
-    if (searchTerm) {
-      return `Resultados para "${searchTerm}" (${filteredProducts.length})`;
-    }
-    
-    if (selectedCategory?.nome === 'Todos' || selectedCategory?.id === 'all') {
-      return `Todos os Produtos (${filteredProducts.length})`;
-    }
-    
-    return `${selectedCategory?.nome} (${filteredProducts.length})`;
-  };
+.add-to-cart-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 70%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
-  if (loading) {
-    return (
-      <div className="loading-products">
-        <div className="loading-spinner"></div>
-        <p>Carregando produtos...</p>
-      </div>
-    );
+.add-to-cart-btn:hover:not(.disabled) {
+  background: linear-gradient(135deg, #4c6dff 0%, #ab56ff 100%);
+  transform: translateY(-1px);
+}
+
+.add-to-cart-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading State */
+.loading-products {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-products .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-products p {
+  color: #666;
+  font-size: 16px;
+}
+
+/* Empty State */
+.no-products {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-products-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.no-products h3 {
+  font-size: 20px;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.no-products p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .category-header h2 {
+    font-size: 20px;
   }
-
-  if (filteredProducts.length === 0) {
-    return (
-      <div className="no-products">
-        <div className="no-products-icon">
-          {searchTerm ? '🔍' : '🍽️'}
-        </div>
-        <h3>
-          {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhum produto disponível'}
-        </h3>
-        <p>
-          {searchTerm 
-            ? `Não encontramos produtos para "${searchTerm}". Tente outros termos.`
-            : 'Não há produtos disponíveis nesta categoria.'
-          }
-        </p>
-        {searchTerm && (
-          <div className="search-suggestions">
-            <p>Sugestões:</p>
-            <ul>
-              <li>Verifique a ortografia</li>
-              <li>Tente palavras mais gerais</li>
-              <li>Use termos diferentes</li>
-            </ul>
-          </div>
-        )}
-      </div>
-    );
+  
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
   }
+  
+  .product-image {
+    height: 140px;
+  }
+  
+  .product-emoji {
+    font-size: 40px;
+  }
+  
+  .product-info {
+    padding: 14px;
+  }
+  
+  .product-name {
+    font-size: 15px;
+    height: 40px;
+  }
+  
+  .product-description {
+    height: 28px;
+    margin-bottom: 12px;
+  }
+  
+  .product-price {
+    font-size: 16px;
+  }
+  
+  .add-to-cart-btn {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+}
 
-  return (
-    <>
-      <div className="category-header">
-        <h2>{getCategoryTitle()}</h2>
-        {(searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '')) && (
-          <div className="filter-indicators">
-            {searchTerm && (
-              <span className="filter-tag search-tag">
-                🔍 "{searchTerm}"
-              </span>
-            )}
-            {filters.disponivel && filters.disponivel !== 'all' && (
-              <span className="filter-tag">
-                {filters.disponivel === 'true' ? '✅ Disponível' : '❌ Indisponível'}
-              </span>
-            )}
-            {filters.categoria && filters.categoria !== 'all' && (
-              <span className="filter-tag">
-                📂 {filters.categoria}
-              </span>
-            )}
-            {(filters.precoMin || filters.precoMax) && (
-              <span className="filter-tag">
-                💰 {filters.precoMin ? `Min: ${formatPrice(filters.precoMin)}` : ''}
-                {filters.precoMin && filters.precoMax ? ' - ' : ''}
-                {filters.precoMax ? `Max: ${formatPrice(filters.precoMax)}` : ''}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-      
-      <div className="product-grid">
-        {filteredProducts.map((produto) => (
-          <div 
-            key={produto.id} 
-            className={`product-card ${!produto.disponivel ? 'unavailable' : ''}`}
-            onClick={() => handleProductClick(produto)}
-          >
-            <div className="product-image">
-              <span className="product-emoji">{getProductIcon(produto)}</span>
-              {!produto.disponivel && (
-                <div className="unavailable-badge">Indisponível</div>
-              )}
-            </div>
-            
-            <div className="product-info">
-              <h3 className="product-name" title={produto.nome}>
-                {produto.nome}
-              </h3>
-              
-              {produto.descricao && (
-                <p className="product-description" title={produto.descricao}>
-                  {produto.descricao}
-                </p>
-              )}
-              
-              <div className="product-footer">
-                <div className="product-pricing">
-                  <span className="product-price">
-                    {formatPrice(produto.preco)}
-                  </span>
-                  {produto.tempo_preparo && (
-                    <span className="prep-time">
-                      ⏱️ {produto.tempo_preparo}min
-                    </span>
-                  )}
-                </div>
-                
-                <button 
-                  className={`add-to-cart-btn ${!produto.disponivel ? 'disabled' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (produto.disponivel) {
-                      onAddToCart(produto);
-                    }
-                  }}
-                  disabled={!produto.disponivel}
-                >
-                  {produto.disponivel ? 'Adicionar' : 'Indisponível'}
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .product-card {
+    border-radius: 8px;
+  }
+  
+  .product-image {
+    height: 120px;
+  }
+  
+  .product-emoji {
+    font-size: 36px;
+  }
+  
+  .product-info {
+    padding: 12px;
+  }
+}
 
-      <ProductModal 
-        produto={selectedProduct}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onAddToCart={onAddToCart}
-      />
-    </>
-  );
-};
-
-export default ProductGrid;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
