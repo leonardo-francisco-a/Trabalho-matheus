@@ -1,48 +1,117 @@
-import './Sidebar.css'
+import React from 'react';
+import { useRouter } from '../contexts/RouterContext';
+import './Sidebar.css';
 
 const Sidebar = ({ user, onLogout }) => {
+  const { currentRoute, navigate } = useRouter();
+  
   const menuItems = [
-    { icon: '📊', label: 'Dashboard', active: false },
-    { icon: '🍽️', label: 'Food Order', active: true },
-    { icon: '📋', label: 'Pedidos', active: false },
-    { icon: '⚙️', label: 'Settings', active: false }
-  ]
+    { 
+      id: 'dashboard', 
+      icon: '📊', 
+      label: 'Dashboard',
+      description: 'Visão geral do negócio'
+    },
+    { 
+      id: 'cardapio', 
+      icon: '🍽️', 
+      label: 'Cardápio',
+      description: 'Gerenciar produtos'
+    },
+    { 
+      id: 'pedidos', 
+      icon: '📋', 
+      label: 'Pedidos',
+      description: 'Acompanhar pedidos'
+    },
+    { 
+      id: 'configuracoes', 
+      icon: '⚙️', 
+      label: 'Configurações',
+      description: 'Configurar sistema'
+    }
+  ];
+
+  const handleMenuClick = (itemId) => {
+    navigate(itemId);
+  };
 
   return (
     <div className="sidebar">
       <div className="logo">
-        <h2>🍽️ Cardápio</h2>
+        <div className="logo-icon">🍽️</div>
+        <div className="logo-text">
+          <h2>Cardápio</h2>
+          <span>Sistema de Gestão</span>
+        </div>
       </div>
       
       <nav className="sidebar-nav">
-        {menuItems.map((item, index) => (
-          <div key={index} className={`nav-item ${item.active ? 'active' : ''}`}>
-            <span className="nav-icon">{item.icon}</span>
-            <span className="nav-label">{item.label}</span>
+        <div className="nav-section">
+          <div className="nav-section-title">Menu Principal</div>
+          {menuItems.map((item) => (
+            <div 
+              key={item.id} 
+              className={`nav-item ${currentRoute === item.id ? 'active' : ''}`}
+              onClick={() => handleMenuClick(item.id)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <div className="nav-content">
+                <span className="nav-label">{item.label}</span>
+                <span className="nav-description">{item.description}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="nav-section">
+          <div className="nav-section-title">Ações Rápidas</div>
+          <div className="nav-item quick-action">
+            <span className="nav-icon">➕</span>
+            <div className="nav-content">
+              <span className="nav-label">Novo Produto</span>
+              <span className="nav-description">Adicionar ao cardápio</span>
+            </div>
           </div>
-        ))}
+          
+          <div className="nav-item quick-action">
+            <span className="nav-icon">📊</span>
+            <div className="nav-content">
+              <span className="nav-label">Relatórios</span>
+              <span className="nav-description">Ver vendas</span>
+            </div>
+          </div>
+        </div>
       </nav>
       
       <div className="sidebar-footer">
-        {user && (
-          <div className="user-info">
-            <div className="user-avatar">
-              {user.nome?.charAt(0).toUpperCase() || '👤'}
-            </div>
-            <div className="user-details">
-              <span className="user-name">{user.nome}</span>
-              <span className="user-type">{user.tipo}</span>
-            </div>
+        <div className="user-info-card">
+          <div className="user-avatar">
+            {user?.nome?.charAt(0).toUpperCase() || '👤'}
           </div>
-        )}
+          <div className="user-details">
+            <div className="user-name">{user?.nome || 'Usuário'}</div>
+            <div className="user-role">{user?.tipo || 'Admin'}</div>
+            <div className="user-email">{user?.email}</div>
+          </div>
+        </div>
         
-        <div className="logout-btn" onClick={onLogout}>
-          <span>🔓</span>
-          <span>Logout</span>
+        <div className="footer-actions">
+          <button className="action-btn help-btn" title="Ajuda">
+            <span>❓</span>
+          </button>
+          
+          <button className="action-btn settings-btn" title="Configurações Rápidas">
+            <span>⚙️</span>
+          </button>
+          
+          <button className="action-btn logout-btn" onClick={onLogout} title="Sair">
+            <span>🚪</span>
+          </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

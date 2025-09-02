@@ -18,6 +18,15 @@ const initialState = {
   categorias: [],
   selectedCategory: { id: 'all', nome: 'Todos' },
   
+  // Busca e filtros
+  searchTerm: '',
+  filters: {
+    disponivel: 'all',
+    precoMin: '',
+    precoMax: '',
+    categoria: 'all'
+  },
+  
   // Carrinho
   cartItems: [],
   
@@ -40,6 +49,11 @@ const ActionTypes = {
   SET_PRODUTOS: 'SET_PRODUTOS',
   SET_CATEGORIAS: 'SET_CATEGORIAS',
   SET_SELECTED_CATEGORY: 'SET_SELECTED_CATEGORY',
+  
+  // Busca e filtros
+  SET_SEARCH_TERM: 'SET_SEARCH_TERM',
+  SET_FILTERS: 'SET_FILTERS',
+  CLEAR_SEARCH_AND_FILTERS: 'CLEAR_SEARCH_AND_FILTERS',
   
   // Carrinho
   ADD_TO_CART: 'ADD_TO_CART',
@@ -86,7 +100,36 @@ function appReducer(state, action) {
       return { ...state, categorias: action.payload };
       
     case ActionTypes.SET_SELECTED_CATEGORY:
-      return { ...state, selectedCategory: action.payload };
+      return { 
+        ...state, 
+        selectedCategory: action.payload,
+        // Limpar busca quando trocar de categoria
+        searchTerm: '',
+        filters: {
+          disponivel: 'all',
+          precoMin: '',
+          precoMax: '',
+          categoria: 'all'
+        }
+      };
+
+    case ActionTypes.SET_SEARCH_TERM:
+      return { ...state, searchTerm: action.payload };
+
+    case ActionTypes.SET_FILTERS:
+      return { ...state, filters: { ...state.filters, ...action.payload } };
+
+    case ActionTypes.CLEAR_SEARCH_AND_FILTERS:
+      return { 
+        ...state, 
+        searchTerm: '', 
+        filters: {
+          disponivel: 'all',
+          precoMin: '',
+          precoMax: '',
+          categoria: 'all'
+        }
+      };
       
     case ActionTypes.ADD_TO_CART:
       const existingItem = state.cartItems.find(item => item.id === action.payload.id);
@@ -175,7 +218,7 @@ export function AppProvider({ children }) {
   
   // Actions
   const actions = {
-    // Auth actions - CORRIGIDO para usar API real
+    // Auth actions
     login: async (email, senha) => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
@@ -309,7 +352,8 @@ export function AppProvider({ children }) {
             { id: 1, nome: 'Lanches' },
             { id: 2, nome: 'Pizzas' },
             { id: 3, nome: 'Bebidas' },
-            { id: 4, nome: 'Sobremesas' }
+            { id: 4, nome: 'Sobremesas' },
+            { id: 5, nome: 'Pratos Principais' }
           ];
           
           const produtos = [
@@ -325,6 +369,16 @@ export function AppProvider({ children }) {
             },
             {
               id: 2,
+              nome: 'X-Bacon Especial',
+              descricao: 'Hambúrguer com carne 180g, bacon crocante, queijo e salada',
+              preco: 22.50,
+              categoria_id: 1,
+              disponivel: true,
+              tempo_preparo: 18,
+              categoria: { id: 1, nome: 'Lanches' }
+            },
+            {
+              id: 3,
               nome: 'Pizza Margherita',
               descricao: 'Molho de tomate, mussarela de búfala e manjericão fresco',
               preco: 35.00,
@@ -334,7 +388,17 @@ export function AppProvider({ children }) {
               categoria: { id: 2, nome: 'Pizzas' }
             },
             {
-              id: 3,
+              id: 4,
+              nome: 'Pizza Portuguesa',
+              descricao: 'Presunto, ovos, cebola, azeitona e mussarela',
+              preco: 42.00,
+              categoria_id: 2,
+              disponivel: true,
+              tempo_preparo: 25,
+              categoria: { id: 2, nome: 'Pizzas' }
+            },
+            {
+              id: 5,
               nome: 'Coca-Cola 350ml',
               descricao: 'Refrigerante gelado',
               preco: 5.00,
@@ -344,7 +408,17 @@ export function AppProvider({ children }) {
               categoria: { id: 3, nome: 'Bebidas' }
             },
             {
-              id: 4,
+              id: 6,
+              nome: 'Suco de Laranja 500ml',
+              descricao: 'Suco natural da fruta',
+              preco: 8.50,
+              categoria_id: 3,
+              disponivel: true,
+              tempo_preparo: 5,
+              categoria: { id: 3, nome: 'Bebidas' }
+            },
+            {
+              id: 7,
               nome: 'Pudim de Leite',
               descricao: 'Pudim caseiro com calda de caramelo',
               preco: 8.50,
@@ -352,6 +426,36 @@ export function AppProvider({ children }) {
               disponivel: true,
               tempo_preparo: 5,
               categoria: { id: 4, nome: 'Sobremesas' }
+            },
+            {
+              id: 8,
+              nome: 'Brownie com Sorvete',
+              descricao: 'Brownie quente com bola de sorvete de baunilha',
+              preco: 12.00,
+              categoria_id: 4,
+              disponivel: true,
+              tempo_preparo: 8,
+              categoria: { id: 4, nome: 'Sobremesas' }
+            },
+            {
+              id: 9,
+              nome: 'Lasanha Bolonhesa',
+              descricao: 'Lasanha tradicional com molho bolonhesa e queijo',
+              preco: 28.90,
+              categoria_id: 5,
+              disponivel: true,
+              tempo_preparo: 30,
+              categoria: { id: 5, nome: 'Pratos Principais' }
+            },
+            {
+              id: 10,
+              nome: 'Frango Grelhado',
+              descricao: 'Filé de frango grelhado com arroz e salada',
+              preco: 22.50,
+              categoria_id: 5,
+              disponivel: false,
+              tempo_preparo: 25,
+              categoria: { id: 5, nome: 'Pratos Principais' }
             }
           ];
           
@@ -376,6 +480,19 @@ export function AppProvider({ children }) {
     
     setSelectedCategory: (category) => {
       dispatch({ type: ActionTypes.SET_SELECTED_CATEGORY, payload: category });
+    },
+
+    // Search and filter actions
+    setSearchTerm: (term) => {
+      dispatch({ type: ActionTypes.SET_SEARCH_TERM, payload: term });
+    },
+
+    setFilters: (filters) => {
+      dispatch({ type: ActionTypes.SET_FILTERS, payload: filters });
+    },
+
+    clearSearchAndFilters: () => {
+      dispatch({ type: ActionTypes.CLEAR_SEARCH_AND_FILTERS });
     },
     
     // Carrinho actions
