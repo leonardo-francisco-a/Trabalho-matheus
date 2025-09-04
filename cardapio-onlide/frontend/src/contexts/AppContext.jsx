@@ -18,6 +18,9 @@ const initialState = {
   categorias: [],
   selectedCategory: { id: 'all', nome: 'Todos' },
   
+  // Pedidos
+  pedidos: [],
+  
   // Busca e filtros
   searchTerm: '',
   filters: {
@@ -49,6 +52,11 @@ const ActionTypes = {
   SET_PRODUTOS: 'SET_PRODUTOS',
   SET_CATEGORIAS: 'SET_CATEGORIAS',
   SET_SELECTED_CATEGORY: 'SET_SELECTED_CATEGORY',
+  
+  // Pedidos
+  SET_PEDIDOS: 'SET_PEDIDOS',
+  ADD_PEDIDO: 'ADD_PEDIDO',
+  UPDATE_PEDIDO_STATUS: 'UPDATE_PEDIDO_STATUS',
   
   // Busca e filtros
   SET_SEARCH_TERM: 'SET_SEARCH_TERM',
@@ -111,6 +119,25 @@ function appReducer(state, action) {
           precoMax: '',
           categoria: 'all'
         }
+      };
+
+    case ActionTypes.SET_PEDIDOS:
+      return { ...state, pedidos: action.payload };
+      
+    case ActionTypes.ADD_PEDIDO:
+      return { 
+        ...state, 
+        pedidos: [action.payload, ...state.pedidos] 
+      };
+      
+    case ActionTypes.UPDATE_PEDIDO_STATUS:
+      return {
+        ...state,
+        pedidos: state.pedidos.map(pedido =>
+          pedido.id === action.payload.id
+            ? { ...pedido, status: action.payload.status }
+            : pedido
+        )
       };
 
     case ActionTypes.SET_SEARCH_TERM:
@@ -518,6 +545,31 @@ export function AppProvider({ children }) {
       toast.success('Carrinho limpo');
     },
     
+    // Pedidos actions
+    loadPedidos: async () => {
+      try {
+        const response = await pedidosService.listarPedidos();
+        dispatch({ type: ActionTypes.SET_PEDIDOS, payload: response.pedidos || [] });
+      } catch (error) {
+        console.warn('Erro ao carregar pedidos da API:', error);
+        // Manter pedidos existentes no estado local
+      }
+    },
+    
+    updatePedidoStatus: async (pedidoId, novoStatus) => {
+      try {
+        await pedidosService.atualizarStatus(pedidoId, novoStatus);
+        dispatch({ 
+          type: ActionTypes.UPDATE_PEDIDO_STATUS, 
+          payload: { id: pedidoId, status: novoStatus }
+        });
+        toast.success('Status do pedido atualizado');
+      } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        toast.error('Erro ao atualizar status do pedido');
+      }
+    },
+    
     placeOrder: async (orderData) => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
@@ -533,6 +585,8 @@ export function AppProvider({ children }) {
             itens: orderData.itens
           });
           
+          // Adicionar o pedido ao estado local
+          dispatch({ type: ActionTypes.ADD_PEDIDO, payload: response.pedido });
           dispatch({ type: ActionTypes.CLEAR_CART });
           toast.success(`Pedido ${response.pedido.numero_pedido} criado com sucesso!`);
           
@@ -545,18 +599,36 @@ export function AppProvider({ children }) {
           const numeroPedido = `PED${Date.now().toString().slice(-6)}`;
           const total = state.cartItems.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
           
-          console.log('🍽️ Pedido simulado criado:', {
-            numero: numeroPedido,
-            cliente: orderData.cliente_nome,
-            itens: state.cartItems.length,
+          // Criar pedido simulado
+          const pedidoSimulado = {
+            id: Date.now(),
+            numero_pedido: numeroPedido,
+            cliente_nome: orderData.cliente_nome,
+            cliente_telefone: orderData.cliente_telefone,
+            cliente_email: orderData.cliente_email,
+            endereco_entrega: orderData.endereco_entrega,
+            tipo_entrega: orderData.tipo_entrega,
+            observacoes: orderData.observacoes || '',
+            status: 'recebido',
             total: total.toFixed(2),
-            tipo: orderData.tipo_entrega
-          });
+            createdAt: new Date().toISOString(),
+            itens: state.cartItems.map(item => ({
+              id: Date.now() + Math.random(),
+              nome: item.nome,
+              quantidade: item.quantity,
+              preco_unitario: item.preco,
+              observacoes: item.observacoes || ''
+            }))
+          };
           
+          console.log('🍽️ Pedido simulado criado:', pedidoSimulado);
+          
+          // Adicionar ao estado local
+          dispatch({ type: ActionTypes.ADD_PEDIDO, payload: pedidoSimulado });
           dispatch({ type: ActionTypes.CLEAR_CART });
           toast.success(`Pedido ${numeroPedido} criado com sucesso! (modo demo)`);
           
-          return { numero_pedido: numeroPedido, total };
+          return pedidoSimulado;
         }
         
       } catch (error) {
