@@ -11,55 +11,9 @@ import ProductGrid from './components/ProductGrid'
 import Cart from './components/Cart'
 import Dashboard from './components/Dashboard'
 import LoadingSpinner from './components/LoadingSpinner'
+import PedidosPage from './components/PedidosPage'
 
-// Componente das páginas
-const PedidosPage = () => {
-  return (
-    <div className="page">
-      <div className="page-header">
-        <h1>Gerenciar Pedidos</h1>
-        <p>Visualize e gerencie todos os pedidos do restaurante</p>
-      </div>
-      
-      <div className="pedidos-filters">
-        <div className="filter-group">
-          <label>Status:</label>
-          <select>
-            <option value="todos">Todos</option>
-            <option value="recebido">Recebido</option>
-            <option value="preparando">Preparando</option>
-            <option value="pronto">Pronto</option>
-            <option value="entregue">Entregue</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
-        
-        <div className="filter-group">
-          <label>Período:</label>
-          <select>
-            <option value="hoje">Hoje</option>
-            <option value="ontem">Ontem</option>
-            <option value="semana">Esta semana</option>
-            <option value="mes">Este mês</option>
-          </select>
-        </div>
-        
-        <button className="refresh-btn">
-          🔄 Atualizar
-        </button>
-      </div>
-      
-      <div className="pedidos-grid">
-        <div className="no-pedidos">
-          <div className="no-pedidos-icon">📋</div>
-          <h3>Nenhum pedido encontrado</h3>
-          <p>Os pedidos aparecerão aqui quando forem feitos</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
+// Componente das configurações (mantido da versão anterior)
 const ConfiguracoesPage = () => {
   return (
     <div className="page">

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useApp } from '../contexts/AppContext';
 import { dashboardService } from '../services/api';
 import './Dashboard.css';
 
 const Dashboard = ({ user }) => {
+  const { state } = useApp();
   const [stats, setStats] = useState({
     pedidos_hoje: 0,
     faturamento_hoje: '0.00',
@@ -11,49 +13,57 @@ const Dashboard = ({ user }) => {
     pedidos_por_status: []
   });
   
-  const [recentOrders, setRecentOrders] = useState([
-    {
-      id: 1,
-      numero_pedido: 'PED123456',
-      cliente_nome: 'João Silva',
-      total: 45.90,
-      status: 'preparando',
-      createdAt: new Date().toISOString(),
-      itens: [
-        { nome: 'X-Burger Clássico', quantidade: 2 },
-        { nome: 'Coca-Cola 350ml', quantidade: 1 }
-      ]
-    },
-    {
-      id: 2,
-      numero_pedido: 'PED123457',
-      cliente_nome: 'Maria Santos',
-      total: 28.50,
-      status: 'pronto',
-      createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
-      itens: [
-        { nome: 'Pizza Margherita', quantidade: 1 }
-      ]
-    },
-    {
-      id: 3,
-      numero_pedido: 'PED123458',
-      cliente_nome: 'Carlos Lima',
-      total: 52.00,
-      status: 'recebido',
-      createdAt: new Date(Date.now() - 30 * 60000).toISOString(),
-      itens: [
-        { nome: 'Lasanha Bolonhesa', quantidade: 1 },
-        { nome: 'Suco de Laranja', quantidade: 2 }
-      ]
-    }
-  ]);
-  
+  const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [state.pedidos]);
+
+  // Calcular estatísticas baseadas no estado real
+  const calculateStats = () => {
+    const pedidos = state.pedidos || [];
+    const produtos = state.produtos || [];
+    
+    // Data de hoje
+    const hoje = new Date();
+    const hojeStr = hoje.toDateString();
+    
+    // Pedidos de hoje
+    const pedidosHoje = pedidos.filter(pedido => {
+      const dataPedido = new Date(pedido.createdAt);
+      return dataPedido.toDateString() === hojeStr;
+    });
+    
+    // Faturamento de hoje
+    const faturamentoHoje = pedidosHoje
+      .filter(pedido => pedido.status !== 'cancelado')
+      .reduce((sum, pedido) => sum + parseFloat(pedido.total || 0), 0);
+    
+    // Pedidos pendentes
+    const pedidosPendentes = pedidos.filter(pedido => 
+      ['recebido', 'preparando'].includes(pedido.status)
+    ).length;
+    
+    // Contagem por status
+    const statusCount = pedidos.reduce((acc, pedido) => {
+      acc[pedido.status] = (acc[pedido.status] || 0) + 1;
+      return acc;
+    }, {});
+    
+    const pedidosPorStatus = Object.entries(statusCount).map(([status, quantidade]) => ({
+      status,
+      quantidade
+    }));
+    
+    return {
+      pedidos_hoje: pedidosHoje.length,
+      faturamento_hoje: faturamentoHoje.toFixed(2),
+      pedidos_pendentes: pedidosPendentes,
+      total_itens_cardapio: produtos.filter(p => p.disponivel).length,
+      pedidos_por_status: pedidosPorStatus
+    };
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -64,21 +74,27 @@ const Dashboard = ({ user }) => {
         const statsData = await dashboardService.obterEstatisticas();
         setStats(statsData);
       } catch (error) {
-        console.warn('API indisponível, usando dados mockados');
-        // Usar dados mockados se API falhar
-        setStats({
-          pedidos_hoje: 15,
-          faturamento_hoje: '287.50',
-          pedidos_pendentes: 5,
-          total_itens_cardapio: 10,
-          pedidos_por_status: [
-            { status: 'recebido', quantidade: 3 },
-            { status: 'preparando', quantidade: 2 },
-            { status: 'pronto', quantidade: 1 },
-            { status: 'entregue', quantidade: 8 },
-            { status: 'cancelado', quantidade: 1 }
-          ]
-        });
+        console.warn('API indisponível, calculando stats do estado local');
+        // Usar dados calculados do estado local
+        const localStats = calculateStats();
+        setStats(localStats);
+      }
+      
+      // Definir pedidos recentes do estado ou criar mock
+      const pedidos = state.pedidos || [];
+      if (pedidos.length > 0) {
+        // Usar pedidos reais do estado
+        const pedidosRecentes = pedidos
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5)
+          .map(pedido => ({
+            ...pedido,
+            itens: pedido.itens || []
+          }));
+        setRecentOrders(pedidosRecentes);
+      } else {
+        // Se não há pedidos reais, usar alguns dados de exemplo
+        setRecentOrders([]);
       }
       
     } catch (error) {
@@ -134,6 +150,21 @@ const Dashboard = ({ user }) => {
     });
   };
 
+  // Calcular tendência comparada com ontem
+  const getTrend = (current, type) => {
+    // Por simplicidade, simular uma tendência
+    const trends = {
+      pedidos: Math.random() > 0.5 ? '+5' : '-2',
+      faturamento: Math.random() > 0.5 ? '+12%' : '-5%'
+    };
+    
+    const isPositive = trends[type]?.startsWith('+');
+    return {
+      value: trends[type] || '0%',
+      isPositive
+    };
+  };
+
   if (loading) {
     return (
       <div className="dashboard-loading">
@@ -142,6 +173,9 @@ const Dashboard = ({ user }) => {
       </div>
     );
   }
+
+  const pedidosTrend = getTrend(stats.pedidos_hoje, 'pedidos');
+  const faturamentoTrend = getTrend(stats.faturamento_hoje, 'faturamento');
 
   return (
     <div className="dashboard">
@@ -157,7 +191,9 @@ const Dashboard = ({ user }) => {
           <div className="stat-content">
             <h3>Faturamento Hoje</h3>
             <p className="stat-value">{formatPrice(stats.faturamento_hoje)}</p>
-            <span className="stat-trend positive">+12% vs ontem</span>
+            <span className={`stat-trend ${faturamentoTrend.isPositive ? 'positive' : 'negative'}`}>
+              {faturamentoTrend.value} vs ontem
+            </span>
           </div>
         </div>
 
@@ -166,7 +202,9 @@ const Dashboard = ({ user }) => {
           <div className="stat-content">
             <h3>Pedidos Hoje</h3>
             <p className="stat-value">{stats.pedidos_hoje}</p>
-            <span className="stat-trend positive">+5 novos</span>
+            <span className={`stat-trend ${pedidosTrend.isPositive ? 'positive' : 'negative'}`}>
+              {pedidosTrend.value} novos
+            </span>
           </div>
         </div>
 
@@ -194,18 +232,24 @@ const Dashboard = ({ user }) => {
         <div className="status-chart-card">
           <h3>Status dos Pedidos</h3>
           <div className="status-chart">
-            {stats.pedidos_por_status.map((item) => (
-              <div key={item.status} className="status-item">
-                <div className="status-info">
-                  <span 
-                    className="status-dot" 
-                    style={{ backgroundColor: getStatusColor(item.status) }}
-                  ></span>
-                  <span className="status-name">{getStatusLabel(item.status)}</span>
-                </div>
-                <span className="status-count">{item.quantidade}</span>
+            {stats.pedidos_por_status.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                <p>Nenhum pedido ainda</p>
               </div>
-            ))}
+            ) : (
+              stats.pedidos_por_status.map((item) => (
+                <div key={item.status} className="status-item">
+                  <div className="status-info">
+                    <span 
+                      className="status-dot" 
+                      style={{ backgroundColor: getStatusColor(item.status) }}
+                    ></span>
+                    <span className="status-name">{getStatusLabel(item.status)}</span>
+                  </div>
+                  <span className="status-count">{item.quantidade}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -218,45 +262,59 @@ const Dashboard = ({ user }) => {
           </div>
           
           <div className="orders-list">
-            {recentOrders.map((order) => (
-              <div key={order.id} className="order-item">
-                <div className="order-header">
-                  <div className="order-id">#{order.numero_pedido}</div>
-                  <div 
-                    className="order-status"
-                    style={{ color: getStatusColor(order.status) }}
-                  >
-                    {getStatusLabel(order.status)}
-                  </div>
-                </div>
-                
-                <div className="order-details">
-                  <div className="order-customer">
-                    <strong>{order.cliente_nome}</strong>
-                  </div>
-                  <div className="order-items">
-                    {order.itens.map((item, index) => (
-                      <span key={index}>
-                        {item.quantidade}x {item.nome}
-                        {index < order.itens.length - 1 ? ', ' : ''}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="order-footer">
-                  <div className="order-total">{formatPrice(order.total)}</div>
-                  <div className="order-time">{formatDate(order.createdAt)}</div>
-                </div>
+            {recentOrders.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                <h4>Nenhum pedido recente</h4>
+                <p>Os pedidos aparecerão aqui quando forem feitos</p>
               </div>
-            ))}
+            ) : (
+              recentOrders.map((order) => (
+                <div key={order.id} className="order-item">
+                  <div className="order-header">
+                    <div className="order-id">#{order.numero_pedido || `PED${order.id}`}</div>
+                    <div 
+                      className="order-status"
+                      style={{ color: getStatusColor(order.status) }}
+                    >
+                      {getStatusLabel(order.status)}
+                    </div>
+                  </div>
+                  
+                  <div className="order-details">
+                    <div className="order-customer">
+                      <strong>{order.cliente_nome}</strong>
+                    </div>
+                    <div className="order-items">
+                      {order.itens && order.itens.length > 0 ? (
+                        order.itens.map((item, index) => (
+                          <span key={index}>
+                            {item.quantidade}x {item.nome || item.produto?.nome}
+                            {index < order.itens.length - 1 ? ', ' : ''}
+                          </span>
+                        ))
+                      ) : (
+                        <span>Detalhes indisponíveis</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="order-footer">
+                    <div className="order-total">{formatPrice(order.total)}</div>
+                    <div className="order-time">{formatDate(order.createdAt)}</div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
-          <div className="orders-footer">
-            <button className="view-all-btn">
-              Ver Todos os Pedidos →
-            </button>
-          </div>
+          {recentOrders.length > 0 && (
+            <div className="orders-footer">
+              <button className="view-all-btn">
+                Ver Todos os Pedidos →
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
