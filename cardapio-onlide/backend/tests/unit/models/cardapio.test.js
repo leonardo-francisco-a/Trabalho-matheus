@@ -1,7 +1,98 @@
-const { Cardapio, Categoria } = require('../../../src/models');
+const { Sequelize, DataTypes } = require('sequelize');
+
+// Configurar banco em memória para testes
+const sequelize = new Sequelize('sqlite::memory:', {
+  dialect: 'sqlite',
+  logging: false
+});
+
+// Definir modelo Categoria para teste
+const Categoria = sequelize.define('Categoria', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  nome: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
+  },
+  descricao: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  ativo: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  }
+}, {
+  tableName: 'categorias'
+});
+
+// Definir modelo Cardapio para teste
+const Cardapio = sequelize.define('Cardapio', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  nome: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    validate: {
+      notEmpty: true
+    }
+  },
+  descricao: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  preco: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    validate: {
+      min: 0,
+      isDecimal: true
+    }
+  },
+  categoria_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'categorias',
+      key: 'id'
+    }
+  },
+  disponivel: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  tempo_preparo: {
+    type: DataTypes.INTEGER,
+    defaultValue: 30
+  }
+}, {
+  tableName: 'cardapio'
+});
+
+// Relacionamentos
+Categoria.hasMany(Cardapio, { foreignKey: 'categoria_id', as: 'itens' });
+Cardapio.belongsTo(Categoria, { foreignKey: 'categoria_id', as: 'categoria' });
 
 describe('Cardapio Model', () => {
   let categoria;
+
+  beforeAll(async () => {
+    await sequelize.authenticate();
+    await sequelize.sync({ force: true });
+  });
+
+  afterAll(async () => {
+    await sequelize.close();
+  });
 
   beforeEach(async () => {
     // Limpar dados

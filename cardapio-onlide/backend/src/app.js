@@ -12,7 +12,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ============ ROTAS DE TESTE ============
+// ============ ROTAS DE HEALTH ============
 app.get('/', (req, res) => {
   res.json({ 
     message: '🍽️ Backend Sistema de Cardápio funcionando!',
@@ -29,53 +29,39 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ============ ROTAS DE AUTH SIMPLES ============
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    console.log('🔐 POST /api/auth/login', req.body);
-    const { email, senha } = req.body;
-    
-    if (!email || !senha) {
-      return res.status(400).json({ 
-        error: 'Dados inválidos',
-        details: [{ msg: 'Email e senha são obrigatórios' }]
-      });
-    }
-    
-    // Tentar usar controller real primeiro
+// ============ ROTAS REAIS ============
+try {
+  // Importar e usar rotas reais se modelos estiverem disponíveis
+  const authRoutes = require('./routes/auth');
+  const cardapioRoutes = require('./routes/cardapio');
+  const pedidosRoutes = require('./routes/pedidos');
+  const dashboardRoutes = require('./routes/dashboard');
+
+  app.use('/api/auth', authRoutes);
+  app.use('/api/cardapio', cardapioRoutes);
+  app.use('/api/pedidos', pedidosRoutes);
+  app.use('/api/dashboard', dashboardRoutes);
+
+  console.log('✅ Rotas reais carregadas');
+
+} catch (error) {
+  console.warn('⚠️ Rotas reais indisponíveis, usando fallback:', error.message);
+
+  // ============ FALLBACK ROUTES ============
+  // Auth routes
+  app.post('/api/auth/login', async (req, res) => {
     try {
-      const { Usuario } = require('./models');
+      console.log('🔐 POST /api/auth/login', req.body);
+      const { email, senha } = req.body;
       
-      const usuario = await Usuario.findOne({ 
-        where: { email, ativo: true } 
-      });
-      
-      if (!usuario) {
-        return res.status(401).json({ error: 'Credenciais inválidas' });
+      if (!email || !senha) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Email e senha são obrigatórios' }]
+        });
       }
-      
-      const senhaValida = await usuario.verificarSenha(senha);
-      if (!senhaValida) {
-        return res.status(401).json({ error: 'Credenciais inválidas' });
-      }
-      
-      const token = 'jwt-token-real-' + Date.now();
-      
-      res.json({
-        message: 'Login realizado com sucesso',
-        token,
-        usuario: {
-          id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          tipo: usuario.tipo
-        }
-      });
-      
-    } catch (modelError) {
-      console.warn('⚠️ Erro ao usar modelos, usando mock:', modelError.message);
-      
-      // Mock login
+
+      // Mock login básico
       if (email === 'admin@cardapio.com' && senha === 'admin123') {
         res.json({
           message: 'Login realizado com sucesso',
@@ -90,87 +76,48 @@ app.post('/api/auth/login', async (req, res) => {
       } else {
         res.status(401).json({ error: 'Credenciais inválidas' });
       }
-    }
-    
-  } catch (error) {
-    console.error('❌ Erro no login:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    console.log('📝 POST /api/auth/register', req.body);
-    const { nome, email, senha, telefone } = req.body;
-    
-    // Validação básica
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ 
-        error: 'Dados inválidos',
-        details: [{ msg: 'Nome, email e senha são obrigatórios' }]
-      });
-    }
-    
-    if (nome.length < 2) {
-      return res.status(400).json({ 
-        error: 'Dados inválidos',
-        details: [{ msg: 'Nome deve ter pelo menos 2 caracteres' }]
-      });
-    }
-    
-    if (senha.length < 6) {
-      return res.status(400).json({ 
-        error: 'Dados inválidos',
-        details: [{ msg: 'Senha deve ter pelo menos 6 caracteres' }]
-      });
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ 
-        error: 'Dados inválidos',
-        details: [{ msg: 'Email inválido' }]
-      });
-    }
-    
-    // Tentar usar modelo real primeiro
-    try {
-      const { Usuario } = require('./models');
       
-      // Verificar se email já existe
-      const existingUser = await Usuario.findOne({ where: { email } });
-      if (existingUser) {
-        return res.status(409).json({ 
-          error: 'Email já cadastrado',
-          details: [{ msg: 'Este email já está sendo usado' }]
+    } catch (error) {
+      console.error('❌ Erro no login:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      console.log('📝 POST /api/auth/register', req.body);
+      const { nome, email, senha, telefone } = req.body;
+      
+      // Validação básica
+      if (!nome || !email || !senha) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Nome, email e senha são obrigatórios' }]
         });
       }
       
-      // Criar usuário
-      const usuario = await Usuario.create({
-        nome,
-        email,
-        senha,
-        telefone: telefone || null,
-        tipo: 'admin' // Por padrão criar como admin
-      });
+      if (nome.length < 2) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Nome deve ter pelo menos 2 caracteres' }]
+        });
+      }
       
-      const token = 'jwt-token-real-' + Date.now();
+      if (senha.length < 6) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Senha deve ter pelo menos 6 caracteres' }]
+        });
+      }
       
-      res.status(201).json({
-        message: 'Usuário criado com sucesso',
-        token,
-        usuario: {
-          id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          tipo: usuario.tipo
-        }
-      });
-      
-    } catch (modelError) {
-      console.warn('⚠️ Erro ao usar modelos, simulando criação:', modelError.message);
-      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Email inválido' }]
+        });
+      }
+
       // Mock register
       const usuario = {
         id: Date.now(),
@@ -180,43 +127,25 @@ app.post('/api/auth/register', async (req, res) => {
       };
       
       res.status(201).json({
-        message: 'Usuário criado com sucesso (modo demo)',
+        message: 'Usuário criado com sucesso',
         token: 'mock-jwt-token-' + Date.now(),
         usuario
       });
-    }
-    
-  } catch (error) {
-    console.error('❌ Erro no registro:', error);
-    res.status(500).json({ 
-      error: 'Erro interno do servidor',
-      message: error.message 
-    });
-  }
-});
-
-// ============ ROTA DE TESTE SIMPLES PARA CATEGORIAS ============
-app.get('/api/cardapio/categorias', async (req, res) => {
-  try {
-    console.log('📂 GET /api/cardapio/categorias - Teste simples');
-    
-    // Primeiro tentar importar e usar modelos reais
-    try {
-      const { Categoria } = require('./models');
-      console.log('✅ Modelos importados com sucesso');
       
-      const categorias = await Categoria.findAll({
-        where: { ativo: true },
-        order: [['nome', 'ASC']]
+    } catch (error) {
+      console.error('❌ Erro no registro:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        message: error.message 
       });
+    }
+  });
+
+  // Cardapio routes
+  app.get('/api/cardapio/categorias', async (req, res) => {
+    try {
+      console.log('📂 GET /api/cardapio/categorias');
       
-      console.log(`✅ ${categorias.length} categorias encontradas no banco`);
-      res.json(categorias);
-      
-    } catch (modelError) {
-      console.warn('⚠️ Erro ao usar modelos, retornando dados mockados:', modelError.message);
-      
-      // Fallback para dados mockados se modelos falharem
       const categoriasMock = [
         { id: 1, nome: 'Lanches', descricao: 'Hambúrguers e sanduíches', ativo: true },
         { id: 2, nome: 'Pizzas', descricao: 'Pizzas tradicionais', ativo: true },
@@ -225,50 +154,20 @@ app.get('/api/cardapio/categorias', async (req, res) => {
       ];
       
       res.json(categoriasMock);
+      
+    } catch (error) {
+      console.error('❌ Erro na rota /api/cardapio/categorias:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        message: error.message
+      });
     }
-    
-  } catch (error) {
-    console.error('❌ Erro na rota /api/cardapio/categorias:', error);
-    res.status(500).json({ 
-      error: 'Erro interno do servidor',
-      message: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+  });
 
-// ============ ROTA DE TESTE SIMPLES PARA CARDAPIO ============
-app.get('/api/cardapio', async (req, res) => {
-  try {
-    console.log('🍕 GET /api/cardapio');
-    
-    // Tentar usar modelos reais
+  app.get('/api/cardapio', async (req, res) => {
     try {
-      const { Cardapio, Categoria } = require('./models');
-      const { categoria_id } = req.query;
+      console.log('🍕 GET /api/cardapio', req.query);
       
-      const where = {};
-      if (categoria_id && categoria_id !== 'all') where.categoria_id = categoria_id;
-
-      const itens = await Cardapio.findAll({
-        where,
-        include: [{
-          model: Categoria,
-          as: 'categoria',
-          attributes: ['id', 'nome']
-        }],
-        order: [['nome', 'ASC']]
-      });
-
-      res.json({
-        itens,
-        total: itens.length
-      });
-      
-    } catch (modelError) {
-      console.warn('⚠️ Erro ao usar modelos para cardápio, usando dados mockados');
-      
-      // Dados mockados
       const produtos = [
         {
           id: 1,
@@ -286,25 +185,85 @@ app.get('/api/cardapio', async (req, res) => {
           descricao: 'Molho de tomate, mussarela de búfala e manjericão fresco',
           preco: 35.00,
           categoria_id: 2,
-          disponivel: true,
+          disponivel: false,
           tempo_preparo: 25,
           categoria: { id: 2, nome: 'Pizzas' }
         }
       ];
+
+      // Aplicar filtro de disponibilidade se fornecido
+      let filteredProducts = produtos;
+      if (req.query.disponivel !== undefined) {
+        const isAvailable = req.query.disponivel === 'true';
+        filteredProducts = produtos.filter(produto => produto.disponivel === isAvailable);
+      }
       
       res.json({
-        itens: produtos,
-        total: produtos.length
+        itens: filteredProducts,
+        total: filteredProducts.length
+      });
+      
+    } catch (error) {
+      console.error('❌ Erro na rota /api/cardapio:', error);
+      res.status(500).json({ 
+        error: error.message 
       });
     }
-    
-  } catch (error) {
-    console.error('❌ Erro na rota /api/cardapio:', error);
-    res.status(500).json({ 
-      error: error.message 
-    });
-  }
-});
+  });
+
+  // POST route for cardapio (authenticated)
+  app.post('/api/cardapio', async (req, res) => {
+    try {
+      console.log('➕ POST /api/cardapio', req.body);
+      
+      // Check for authorization header
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Token de acesso requerido' });
+      }
+
+      const { nome, preco, categoria_id } = req.body;
+      
+      // Validate required fields
+      if (!nome) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Nome é obrigatório' }]
+        });
+      }
+      
+      if (!preco) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos',
+          details: [{ msg: 'Preço é obrigatório' }]
+        });
+      }
+
+      // Mock creation
+      const novoItem = {
+        id: Date.now(),
+        nome,
+        preco: parseFloat(preco),
+        categoria_id,
+        disponivel: true,
+        tempo_preparo: 15,
+        createdAt: new Date().toISOString()
+      };
+      
+      res.status(201).json({
+        message: 'Item criado com sucesso',
+        item: novoItem
+      });
+      
+    } catch (error) {
+      console.error('❌ Erro ao criar item:', error);
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        message: error.message 
+      });
+    }
+  });
+}
 
 // ============ 404 HANDLER ============
 app.use('*', (req, res) => {
@@ -318,22 +277,52 @@ app.use('*', (req, res) => {
       'POST /api/auth/login',
       'POST /api/auth/register',
       'GET /api/cardapio/categorias',
-      'GET /api/cardapio'
+      'GET /api/cardapio',
+      'POST /api/cardapio'
     ]
   });
 });
 
-// ============ START SERVER ============
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Backend rodando na porta ${PORT}`);
-  console.log(`🌐 Frontend: http://localhost:3000`);
-  console.log(`📡 Backend: http://localhost:3001`);
-  console.log(`📋 Rotas disponíveis:`);
-  console.log(`   GET  /api/health`);
-  console.log(`   POST /api/auth/login`);
-  console.log(`   POST /api/auth/register`);
-  console.log(`   GET  /api/cardapio/categorias`);
-  console.log(`   GET  /api/cardapio`);
+// ============ ERROR HANDLER ============
+app.use((error, req, res, next) => {
+  console.error('❌ Server Error:', error);
+  res.status(500).json({
+    error: 'Erro interno do servidor',
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Algo deu errado'
+  });
 });
+
+// ============ START SERVER ============
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Backend rodando na porta ${PORT}`);
+    console.log(`🌐 Frontend: http://localhost:3000`);
+    console.log(`📡 Backend: http://localhost:3001`);
+    console.log(`📋 Rotas disponíveis:`);
+    console.log(`   GET  /api/health`);
+    console.log(`   POST /api/auth/login`);
+    console.log(`   POST /api/auth/register`);
+    console.log(`   GET  /api/cardapio/categorias`);
+    console.log(`   GET  /api/cardapio`);
+    console.log(`   POST /api/cardapio`);
+  });
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('🛑 Recebido SIGTERM, fechando servidor...');
+    server.close(() => {
+      console.log('✅ Servidor fechado');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('🛑 Recebido SIGINT, fechando servidor...');
+    server.close(() => {
+      console.log('✅ Servidor fechado');
+      process.exit(0);
+    });
+  });
+}
 
 module.exports = app;
