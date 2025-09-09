@@ -115,7 +115,7 @@ const initializeTestModels = async () => {
     };
 
     modelsInitialized = true;
-    console.log('🧪 Banco de teste configurado');
+    
 
     return testSequelize;
 
@@ -127,6 +127,7 @@ const initializeTestModels = async () => {
 
 beforeAll(async () => {
   await initializeTestModels();
+  console.log('🧪 Banco de teste configurado');
 });
 
 afterAll(async () => {

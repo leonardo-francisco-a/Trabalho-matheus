@@ -61,7 +61,7 @@ const initDatabase = async () => {
         alter: false,
         logging: false 
       });
-      console.log('📊 Estrutura do banco verificada');
+      console.log(' Estrutura do banco verificada');
     }
     
   } catch (error) {
