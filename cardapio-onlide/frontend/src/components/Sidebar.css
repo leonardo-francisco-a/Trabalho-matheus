@@ -64,7 +64,6 @@
   padding: 0 12px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .nav-section {
@@ -161,15 +160,6 @@
   opacity: 0.8;
   margin-top: 1px;
   font-weight: 400;
-}
-
-.nav-item.quick-action {
-  opacity: 0.7;
-  font-size: 13px;
-}
-
-.nav-item.quick-action:hover {
-  opacity: 1;
 }
 
 /* Footer */
@@ -340,10 +330,6 @@
   }
   
   .nav-description {
-    display: none;
-  }
-  
-  .nav-item.quick-action {
     display: none;
   }
   

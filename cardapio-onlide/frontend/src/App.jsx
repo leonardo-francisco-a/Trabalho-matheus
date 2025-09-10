@@ -230,5 +230,12 @@ function App() {
     </RouterProvider>
   )
 }
-
+<Header 
+              user={state.user}
+              produtos={state.produtos}
+              onSearch={actions.setSearchTerm}
+              onFilter={actions.setFilters}
+              onAddProduct={actions.addProduct}
+              categorias={state.categorias}
+            />
 export default App
