@@ -41,8 +41,9 @@ const Pedido = sequelize.define('Pedido', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  // 🔧 CORREÇÃO: Adicionar 'retirada' ao ENUM
   tipo_entrega: {
-    type: DataTypes.ENUM('balcao', 'delivery'),
+    type: DataTypes.ENUM('balcao', 'delivery', 'retirada'),
     allowNull: false,
     defaultValue: 'balcao'
   },
