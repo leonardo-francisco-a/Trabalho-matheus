@@ -121,7 +121,6 @@ function MainContent() {
         return (
           <>
             <Header 
-              user={state.user}
               produtos={state.produtos}
               onSearch={actions.setSearchTerm}
               onFilter={actions.setFilters}

@@ -6,15 +6,18 @@ const {
   atualizarStatusPedido
 } = require('../controllers/pedidosController');
 const { auth, adminOnly } = require('../middleware/auth');
-const { validatePedido } = require('../middleware/validation');
+const { validatePedidoFlexible } = require('../middleware/validation');
 
 const router = express.Router();
 
-// Rotas públicas (para clientes)
-router.post('/', validatePedido, criarPedido);
+// ✅ ROTA PÚBLICA PARA CRIAR PEDIDOS (sem autenticação)
+// Usar validação flexível para evitar erros desnecessários
+router.post('/', validatePedidoFlexible, criarPedido);
+
+// ✅ ROTA PÚBLICA PARA VER PEDIDO ESPECÍFICO (para o cliente)
 router.get('/:id', obterPedido);
 
-// Rotas administrativas
+// ✅ ROTAS ADMINISTRATIVAS (requer autenticação)
 router.get('/', auth, adminOnly, listarPedidos);
 router.put('/:id/status', auth, adminOnly, atualizarStatusPedido);
 

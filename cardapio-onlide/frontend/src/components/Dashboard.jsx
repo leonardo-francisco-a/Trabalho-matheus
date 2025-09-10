@@ -317,32 +317,6 @@ const Dashboard = ({ user }) => {
           )}
         </div>
       </div>
-
-      {/* Ações Rápidas */}
-      <div className="quick-actions">
-        <h3>Ações Rápidas</h3>
-        <div className="actions-grid">
-          <button className="action-btn">
-            <span className="action-icon">➕</span>
-            <span>Adicionar Produto</span>
-          </button>
-          
-          <button className="action-btn">
-            <span className="action-icon">📊</span>
-            <span>Relatórios</span>
-          </button>
-          
-          <button className="action-btn">
-            <span className="action-icon">⚙️</span>
-            <span>Configurações</span>
-          </button>
-          
-          <button className="action-btn">
-            <span className="action-icon">💳</span>
-            <span>Financeiro</span>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
