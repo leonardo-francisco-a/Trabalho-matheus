@@ -4,7 +4,7 @@ import AddProductModal from './AddProductModal';
 import { useRouter } from '../contexts/RouterContext';
 import './Header.css';
 
-const Header = ({ produtos, onSearch, onFilter, onAddProduct, categorias }) => {
+const Header = ({ user, produtos, onSearch, onFilter, onAddProduct, categorias }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const { currentRoute } = useRouter();
@@ -31,7 +31,7 @@ const Header = ({ produtos, onSearch, onFilter, onAddProduct, categorias }) => {
         produtos={produtos}
       />
       
-      <div className="header-actions">
+      <div className="user-section">
         {/* Botão Adicionar Produto - só aparece na página do cardápio */}
         {currentRoute === 'cardapio' && onAddProduct && (
           <button 
@@ -98,6 +98,16 @@ const Header = ({ produtos, onSearch, onFilter, onAddProduct, categorias }) => {
               </div>
             </div>
           )}
+        </div>
+        
+        <div className="user-info">
+          <div className="user-details">
+            <span className="user-greeting">Olá, {user?.nome || 'Usuário'}!</span>
+            <span className="user-role">{user?.tipo || 'Admin'}</span>
+          </div>
+          <div className="user-avatar" title={user?.email}>
+            {user?.nome?.charAt(0).toUpperCase() || '👤'}
+          </div>
         </div>
       </div>
 

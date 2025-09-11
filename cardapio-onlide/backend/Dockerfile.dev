@@ -9,9 +9,6 @@ COPY package*.json ./
 RUN npm install
 RUN npm install -g nodemon
 
-RUN npm install --save-dev @babel/core @babel/preset-env @babel/plugin-transform-runtime babel-jest
-RUN npm install --save @babel/runtime
-
 # Copiar código fonte
 COPY . .
 

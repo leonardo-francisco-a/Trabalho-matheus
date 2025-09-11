@@ -78,6 +78,10 @@ const Sidebar = ({ user, onLogout }) => {
         </div>
         
         <div className="footer-actions">
+          <button className="action-btn help-btn" title="Ajuda">
+            <span>❓</span>
+          </button>
+          
           <button className="action-btn settings-btn" title="Configurações Rápidas">
             <span>⚙️</span>
           </button>
