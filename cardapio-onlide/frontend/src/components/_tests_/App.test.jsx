@@ -1,11 +1,10 @@
-// src/components/_tests_/App.test.jsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../../tests/test-utils'; // Caminho correto: components/_tests_ -> src -> tests
-import App from '../../App'; // Caminho correto: components/_tests_ -> src -> App
+import { render } from '../tests/test-utils';
+import App from '../App';
 
 // Mock das APIs
-vi.mock('../../services/api', () => ({
+vi.mock('../services/api', () => ({
   authService: {
     login: vi.fn(),
     register: vi.fn(),

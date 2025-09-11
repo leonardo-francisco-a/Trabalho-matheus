@@ -50,9 +50,6 @@ const ActionTypes = {
   
   // Produtos
   SET_PRODUTOS: 'SET_PRODUTOS',
-  ADD_PRODUTO: 'ADD_PRODUTO',
-  UPDATE_PRODUTO: 'UPDATE_PRODUTO',
-  DELETE_PRODUTO: 'DELETE_PRODUTO',
   SET_CATEGORIAS: 'SET_CATEGORIAS',
   SET_SELECTED_CATEGORY: 'SET_SELECTED_CATEGORY',
   
@@ -106,28 +103,6 @@ function appReducer(state, action) {
       
     case ActionTypes.SET_PRODUTOS:
       return { ...state, produtos: action.payload };
-      
-    case ActionTypes.ADD_PRODUTO:
-      return { 
-        ...state, 
-        produtos: [...state.produtos, action.payload] 
-      };
-      
-    case ActionTypes.UPDATE_PRODUTO:
-      return {
-        ...state,
-        produtos: state.produtos.map(produto =>
-          produto.id === action.payload.id
-            ? { ...produto, ...action.payload }
-            : produto
-        )
-      };
-      
-    case ActionTypes.DELETE_PRODUTO:
-      return {
-        ...state,
-        produtos: state.produtos.filter(produto => produto.id !== action.payload)
-      };
       
     case ActionTypes.SET_CATEGORIAS:
       return { ...state, categorias: action.payload };
@@ -235,18 +210,6 @@ function appReducer(state, action) {
 
 // Context
 const AppContext = createContext(null);
-
-// Helper function para obter nome da categoria por ID
-const getCategoryNameById = (categoryId) => {
-  const categoryMap = {
-    1: 'Lanches',
-    2: 'Pizzas', 
-    3: 'Bebidas',
-    4: 'Sobremesas',
-    5: 'Pratos Principais'
-  };
-  return categoryMap[categoryId] || 'Categoria';
-};
 
 // Provider
 export function AppProvider({ children }) {
@@ -580,95 +543,6 @@ export function AppProvider({ children }) {
     clearCart: () => {
       dispatch({ type: ActionTypes.CLEAR_CART });
       toast.success('Carrinho limpo');
-    },
-    
-    // Produtos actions
-    addProduct: async (productData) => {
-      try {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-        
-        try {
-          // Tentar adicionar produto via API
-          const response = await cardapioService.adicionarItem(productData);
-          dispatch({ type: ActionTypes.ADD_PRODUTO, payload: response.item });
-          toast.success('Produto adicionado com sucesso!');
-          return response.item;
-          
-        } catch (apiError) {
-          console.warn('⚠️ API indisponível, adicionando produto localmente:', apiError.message);
-          
-          // Fallback para adicionar localmente
-          const newProduct = {
-            id: Date.now(), // ID temporário
-            ...productData,
-            // Criar categoria básica baseada no ID
-            categoria: { 
-              id: productData.categoria_id, 
-              nome: getCategoryNameById(productData.categoria_id)
-            }
-          };
-          
-          dispatch({ type: ActionTypes.ADD_PRODUTO, payload: newProduct });
-          toast.success('Produto adicionado com sucesso! (modo demo)');
-          return newProduct;
-        }
-        
-      } catch (error) {
-        console.error('Erro ao adicionar produto:', error);
-        toast.error('Erro ao adicionar produto');
-        throw error;
-      } finally {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
-      }
-    },
-    
-    updateProduct: async (id, updates) => {
-      try {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-        
-        try {
-          const response = await cardapioService.atualizarItem(id, updates);
-          dispatch({ type: ActionTypes.UPDATE_PRODUTO, payload: { id, ...updates } });
-          toast.success('Produto atualizado com sucesso!');
-          return response.item;
-          
-        } catch (apiError) {
-          console.warn('⚠️ API indisponível, atualizando produto localmente:', apiError.message);
-          dispatch({ type: ActionTypes.UPDATE_PRODUTO, payload: { id, ...updates } });
-          toast.success('Produto atualizado com sucesso! (modo demo)');
-        }
-        
-      } catch (error) {
-        console.error('Erro ao atualizar produto:', error);
-        toast.error('Erro ao atualizar produto');
-        throw error;
-      } finally {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
-      }
-    },
-    
-    deleteProduct: async (id) => {
-      try {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: true });
-        
-        try {
-          await cardapioService.removerItem(id);
-          dispatch({ type: ActionTypes.DELETE_PRODUTO, payload: id });
-          toast.success('Produto removido com sucesso!');
-          
-        } catch (apiError) {
-          console.warn('⚠️ API indisponível, removendo produto localmente:', apiError.message);
-          dispatch({ type: ActionTypes.DELETE_PRODUTO, payload: id });
-          toast.success('Produto removido com sucesso! (modo demo)');
-        }
-        
-      } catch (error) {
-        console.error('Erro ao remover produto:', error);
-        toast.error('Erro ao remover produto');
-        throw error;
-      } finally {
-        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
-      }
     },
     
     // Pedidos actions

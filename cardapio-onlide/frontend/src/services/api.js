@@ -120,58 +120,6 @@ export const cardapioService = {
     }
   },
 
-  // 🆕 NOVA FUNÇÃO: Adicionar item ao cardápio
-  adicionarItem: async (itemData) => {
-    try {
-      console.log('➕ Adicionando item:', itemData);
-      const response = await api.post('/cardapio', itemData);
-      console.log('✅ Item adicionado:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erro ao adicionar item:', error);
-      throw error.response?.data || { error: 'Erro ao adicionar item' };
-    }
-  },
-
-  // 🆕 NOVA FUNÇÃO: Atualizar item do cardápio
-  atualizarItem: async (id, updates) => {
-    try {
-      console.log(`📝 Atualizando item ${id}:`, updates);
-      const response = await api.put(`/cardapio/${id}`, updates);
-      console.log('✅ Item atualizado:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erro ao atualizar item:', error);
-      throw error.response?.data || { error: 'Erro ao atualizar item' };
-    }
-  },
-
-  // 🆕 NOVA FUNÇÃO: Remover item do cardápio
-  removerItem: async (id) => {
-    try {
-      console.log(`🗑️ Removendo item ${id}`);
-      const response = await api.delete(`/cardapio/${id}`);
-      console.log('✅ Item removido');
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erro ao remover item:', error);
-      throw error.response?.data || { error: 'Erro ao remover item' };
-    }
-  },
-
-  // 🆕 NOVA FUNÇÃO: Atualizar disponibilidade do item
-  atualizarDisponibilidade: async (id, disponivel) => {
-    try {
-      console.log(`🔄 Alterando disponibilidade do item ${id} para:`, disponivel);
-      const response = await api.patch(`/cardapio/${id}/disponibilidade`, { disponivel });
-      console.log('✅ Disponibilidade atualizada');
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erro ao atualizar disponibilidade:', error);
-      throw error.response?.data || { error: 'Erro ao atualizar disponibilidade' };
-    }
-  },
-
   listarCategorias: async () => {
     try {
       const response = await api.get('/cardapio/categorias');
@@ -179,19 +127,6 @@ export const cardapioService = {
     } catch (error) {
       console.error('Erro ao carregar categorias:', error);
       throw error.response?.data || { error: 'Erro ao carregar categorias' };
-    }
-  },
-
-  // 🆕 NOVA FUNÇÃO: Adicionar categoria
-  adicionarCategoria: async (categoriaData) => {
-    try {
-      console.log('➕ Adicionando categoria:', categoriaData);
-      const response = await api.post('/cardapio/categorias', categoriaData);
-      console.log('✅ Categoria adicionada:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erro ao adicionar categoria:', error);
-      throw error.response?.data || { error: 'Erro ao adicionar categoria' };
     }
   }
 };

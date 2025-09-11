@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import SearchBar from './SearchBar';
-import AddProductModal from './AddProductModal';
-import { useRouter } from '../contexts/RouterContext';
 import './Header.css';
 
-const Header = ({ user, produtos, onSearch, onFilter, onAddProduct, categorias }) => {
+const Header = ({ user, produtos, onSearch, onFilter }) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showAddProductModal, setShowAddProductModal] = useState(false);
-  const { currentRoute } = useRouter();
 
   const notifications = [
     { id: 1, message: 'Novo pedido #1234 recebido', time: '2 min', unread: true },
@@ -16,12 +12,6 @@ const Header = ({ user, produtos, onSearch, onFilter, onAddProduct, categorias }
   ];
 
   const unreadCount = notifications.filter(n => n.unread).length;
-
-  const handleAddProduct = async (productData) => {
-    if (onAddProduct) {
-      await onAddProduct(productData);
-    }
-  };
 
   return (
     <div className="header">
@@ -32,18 +22,6 @@ const Header = ({ user, produtos, onSearch, onFilter, onAddProduct, categorias }
       />
       
       <div className="user-section">
-        {/* Botão Adicionar Produto - só aparece na página do cardápio */}
-        {currentRoute === 'cardapio' && onAddProduct && (
-          <button 
-            className="add-product-btn"
-            onClick={() => setShowAddProductModal(true)}
-            title="Adicionar novo produto"
-          >
-            <span className="add-icon">➕</span>
-            <span className="add-text">Novo Produto</span>
-          </button>
-        )}
-        
         <div className="notification-wrapper">
           <div 
             className="notification-icon" 
@@ -110,14 +88,6 @@ const Header = ({ user, produtos, onSearch, onFilter, onAddProduct, categorias }
           </div>
         </div>
       </div>
-
-      {/* Modal de Adicionar Produto */}
-      <AddProductModal
-        isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
-        onAddProduct={handleAddProduct}
-        categorias={categorias}
-      />
     </div>
   );
 };

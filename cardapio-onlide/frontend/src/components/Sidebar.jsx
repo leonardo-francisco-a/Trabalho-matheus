@@ -63,6 +63,25 @@ const Sidebar = ({ user, onLogout }) => {
             </div>
           ))}
         </div>
+        
+        <div className="nav-section">
+          <div className="nav-section-title">Ações Rápidas</div>
+          <div className="nav-item quick-action">
+            <span className="nav-icon">➕</span>
+            <div className="nav-content">
+              <span className="nav-label">Novo Produto</span>
+              <span className="nav-description">Adicionar ao cardápio</span>
+            </div>
+          </div>
+          
+          <div className="nav-item quick-action">
+            <span className="nav-icon">📊</span>
+            <div className="nav-content">
+              <span className="nav-label">Relatórios</span>
+              <span className="nav-description">Ver vendas</span>
+            </div>
+          </div>
+        </div>
       </nav>
       
       <div className="sidebar-footer">

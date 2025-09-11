@@ -120,8 +120,8 @@ describe('ProductGrid Component', () => {
 
     const pizzaCard = screen.getByText('Pizza Margherita').closest('.product-card');
     expect(pizzaCard).toHaveClass('unavailable');
-
-    const indisponivelButton = screen.getByRole('button', { name: 'Indisponível' });
+    
+    const indisponivelButton = screen.getByText('Indisponível');
     expect(indisponivelButton).toBeDisabled();
   });
 
@@ -135,12 +135,9 @@ describe('ProductGrid Component', () => {
       />
     );
 
-    const addButton = screen.getByRole('button', { name: 'Adicionar' });
+    const addButton = screen.getByText('Adicionar');
     fireEvent.click(addButton);
 
-    // O botão "Adicionar" só existe em produtos disponíveis
-    // mockProdutos[0] é o X-Burger (disponível)
-    const produtoDisponivel = mockProdutos.find(p => p.disponivel);
-    expect(mockOnAddToCart).toHaveBeenCalledWith(produtoDisponivel);
+    expect(mockOnAddToCart).toHaveBeenCalledWith(mockProdutos[0]);
   });
 });
