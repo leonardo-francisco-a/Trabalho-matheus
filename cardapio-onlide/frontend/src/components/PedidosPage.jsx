@@ -166,7 +166,7 @@ const PedidosPage = () => {
 
   return (
     <div className="pedidos-page">
-      {/* Header da Página - SEM ESTATÍSTICAS */}
+      {/* Header da Página */}
       <div className="pedidos-header">
         <div className="header-content">
           <div className="header-info">
@@ -175,6 +175,19 @@ const PedidosPage = () => {
               Gerenciar Pedidos
             </h1>
             <p>Acompanhe e gerencie todos os pedidos em tempo real</p>
+          </div>
+          
+          <div className="header-stats">
+            <div className="stat-item">
+              <span className="stat-number">{filteredPedidos.length}</span>
+              <span className="stat-label">Encontrados</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">
+                {filteredPedidos.filter(p => ['recebido', 'preparando'].includes(p.status)).length}
+              </span>
+              <span className="stat-label">Pendentes</span>
+            </div>
           </div>
         </div>
       </div>
@@ -240,7 +253,7 @@ const PedidosPage = () => {
         </div>
       </div>
 
-      {/* Lista de Pedidos */}
+      {/* Lista de Pedidos Melhorada */}
       <div className="pedidos-content">
         {filteredPedidos.length === 0 ? (
           <div className="empty-state">
@@ -411,7 +424,7 @@ const PedidosPage = () => {
         )}
       </div>
 
-      {/* Modal de Detalhes */}
+      {/* Modal de Detalhes Melhorado */}
       {selectedPedido && (
         <div className="modal-overlay" onClick={() => setSelectedPedido(null)}>
           <div className="modal-content pedido-modal-modern" onClick={e => e.stopPropagation()}>

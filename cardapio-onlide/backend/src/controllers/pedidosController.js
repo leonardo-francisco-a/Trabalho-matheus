@@ -34,13 +34,13 @@ const criarPedido = async (req, res) => {
       });
     }
 
-    // 🔧 CORREÇÃO: Validar tipos de entrega corretos
+    // Validar tipo de entrega
     const tiposValidos = ['delivery', 'retirada', 'balcao'];
     if (!tiposValidos.includes(tipo_entrega)) {
       await transaction.rollback();
       return res.status(400).json({ 
         error: 'Dados inválidos',
-        details: [{ msg: 'Tipo de entrega deve ser: delivery, retirada ou balcao' }]
+        details: [{ msg: 'Tipo de entrega inválido' }]
       });
     }
 
@@ -175,9 +175,129 @@ const criarPedido = async (req, res) => {
   }
 };
 
-// ... resto do controller permanece igual
+const listarPedidos = async (req, res) => {
+  try {
+    const { status, data_inicio, data_fim, page = 1, limit = 20 } = req.query;
+    
+    const where = {};
+    if (status && status !== 'todos') {
+      where.status = status;
+    }
+    
+    if (data_inicio && data_fim) {
+      where.createdAt = {
+        [require('sequelize').Op.between]: [new Date(data_inicio), new Date(data_fim)]
+      };
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { count, rows: pedidos } = await Pedido.findAndCountAll({
+      where,
+      include: [{
+        model: ItemPedido,
+        as: 'itens',
+        include: [{
+          model: Cardapio,
+          as: 'produto'
+        }]
+      }],
+      order: [['createdAt', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    res.json({
+      pedidos,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erro ao listar pedidos:', error);
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      message: error.message 
+    });
+  }
+};
+
+const obterPedido = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const pedido = await Pedido.findByPk(id, {
+      include: [{
+        model: ItemPedido,
+        as: 'itens',
+        include: [{
+          model: Cardapio,
+          as: 'produto',
+          include: [{
+            model: Categoria,
+            as: 'categoria'
+          }]
+        }]
+      }]
+    });
+
+    if (!pedido) {
+      return res.status(404).json({ error: 'Pedido não encontrado' });
+    }
+
+    res.json(pedido);
+  } catch (error) {
+    console.error('❌ Erro ao obter pedido:', error);
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      message: error.message 
+    });
+  }
+};
+
+const atualizarStatusPedido = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const statusValidos = ['recebido', 'preparando', 'pronto', 'entregue', 'cancelado'];
+    if (!statusValidos.includes(status)) {
+      return res.status(400).json({ 
+        error: 'Dados inválidos',
+        details: [{ msg: 'Status inválido' }]
+      });
+    }
+
+    const pedido = await Pedido.findByPk(id);
+    if (!pedido) {
+      return res.status(404).json({ error: 'Pedido não encontrado' });
+    }
+
+    await pedido.update({ status });
+
+    res.json({
+      message: 'Status do pedido atualizado com sucesso',
+      pedido: {
+        id: pedido.id,
+        numero_pedido: pedido.numero_pedido,
+        status: pedido.status
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erro ao atualizar status:', error);
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      message: error.message 
+    });
+  }
+};
 
 module.exports = {
   criarPedido,
-  // ... outras funções
+  listarPedidos,
+  obterPedido,
+  atualizarStatusPedido
 };

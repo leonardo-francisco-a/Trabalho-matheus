@@ -39,7 +39,7 @@ const validatePedido = [
     .isEmail()
     .withMessage('Email deve ter formato válido'),
   
-  // 🔧 CORREÇÃO: Incluir 'retirada' na validação
+  // Tipo de entrega deve ser válido
   body('tipo_entrega')
     .isIn(['delivery', 'retirada', 'balcao'])
     .withMessage('Tipo de entrega deve ser: delivery, retirada ou balcao'),
@@ -93,7 +93,7 @@ const validatePedidoFlexible = (req, res, next) => {
     errors.push({ msg: 'Nome do cliente é obrigatório e deve ter pelo menos 2 caracteres' });
   }
 
-  // 🔧 CORREÇÃO: Validar tipos de entrega corretos
+  // Validar tipo de entrega
   const tiposValidos = ['delivery', 'retirada', 'balcao'];
   if (!tipo_entrega || !tiposValidos.includes(tipo_entrega)) {
     errors.push({ msg: 'Tipo de entrega deve ser: delivery, retirada ou balcao' });

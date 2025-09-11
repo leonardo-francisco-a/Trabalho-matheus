@@ -48,8 +48,7 @@ try {
   console.warn('⚠️ Rotas reais indisponíveis, usando fallback:', error.message);
 
   // ============ FALLBACK ROUTES ============
-  
-  // ============ AUTH ROUTES ============
+  // Auth routes
   app.post('/api/auth/login', async (req, res) => {
     try {
       console.log('🔐 POST /api/auth/login', req.body);
@@ -142,7 +141,7 @@ try {
     }
   });
 
-  // ============ CARDAPIO ROUTES ============
+  // Cardapio routes
   app.get('/api/cardapio/categorias', async (req, res) => {
     try {
       console.log('📂 GET /api/cardapio/categorias');
@@ -189,26 +188,6 @@ try {
           disponivel: true,
           tempo_preparo: 25,
           categoria: { id: 2, nome: 'Pizzas' }
-        },
-        {
-          id: 3,
-          nome: 'Coca-Cola 350ml',
-          descricao: 'Refrigerante gelado',
-          preco: 5.00,
-          categoria_id: 3,
-          disponivel: true,
-          tempo_preparo: 2,
-          categoria: { id: 3, nome: 'Bebidas' }
-        },
-        {
-          id: 4,
-          nome: 'Pudim de Leite',
-          descricao: 'Pudim caseiro com calda de caramelo',
-          preco: 8.50,
-          categoria_id: 4,
-          disponivel: true,
-          tempo_preparo: 5,
-          categoria: { id: 4, nome: 'Sobremesas' }
         }
       ];
 
@@ -232,6 +211,7 @@ try {
     }
   });
 
+  // POST route for cardapio (authenticated)
   app.post('/api/cardapio', async (req, res) => {
     try {
       console.log('➕ POST /api/cardapio', req.body);
@@ -284,7 +264,7 @@ try {
     }
   });
 
-  // ============ PEDIDOS ROUTES ============
+  // ✅ NOVA ROTA FALLBACK PARA PEDIDOS
   app.post('/api/pedidos', async (req, res) => {
     try {
       console.log('🛒 POST /api/pedidos (fallback)', req.body);
@@ -402,6 +382,7 @@ try {
     }
   });
 
+  // ✅ ROTA FALLBACK PARA LISTAR PEDIDOS
   app.get('/api/pedidos', async (req, res) => {
     try {
       console.log('📋 GET /api/pedidos (fallback)');
@@ -449,6 +430,7 @@ try {
     }
   });
 
+  // ✅ ROTA FALLBACK PARA OBTER PEDIDO ESPECÍFICO
   app.get('/api/pedidos/:id', async (req, res) => {
     try {
       console.log(`📋 GET /api/pedidos/${req.params.id} (fallback)`);
@@ -478,6 +460,7 @@ try {
     }
   });
 
+  // ✅ ROTA FALLBACK PARA ATUALIZAR STATUS DO PEDIDO
   app.put('/api/pedidos/:id/status', async (req, res) => {
     try {
       console.log(`📋 PUT /api/pedidos/${req.params.id}/status (fallback)`, req.body);
@@ -515,85 +498,6 @@ try {
       });
     }
   });
-
-  // ============ DASHBOARD ROUTES ============
-  app.get('/api/dashboard/stats', async (req, res) => {
-    try {
-      console.log('📊 GET /api/dashboard/stats (fallback)');
-      
-      // Check for authorization header
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Token de acesso requerido' });
-      }
-      
-      // Mock de estatísticas para demonstração
-      const hoje = new Date();
-      const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-      
-      // Simular dados de estatísticas
-      const statsMock = {
-        pedidos_hoje: Math.floor(Math.random() * 20) + 5, // 5-25 pedidos
-        faturamento_hoje: (Math.random() * 500 + 200).toFixed(2), // R$ 200-700
-        pedidos_pendentes: Math.floor(Math.random() * 8) + 2, // 2-10 pendentes
-        total_itens_cardapio: 4, // Número fixo baseado nos produtos mock
-        pedidos_por_status: [
-          { status: 'recebido', quantidade: Math.floor(Math.random() * 5) + 1 },
-          { status: 'preparando', quantidade: Math.floor(Math.random() * 4) + 1 },
-          { status: 'pronto', quantidade: Math.floor(Math.random() * 3) },
-          { status: 'entregue', quantidade: Math.floor(Math.random() * 15) + 5 },
-          { status: 'cancelado', quantidade: Math.floor(Math.random() * 2) }
-        ]
-      };
-      
-      res.json(statsMock);
-      
-    } catch (error) {
-      console.error('❌ Erro ao obter estatísticas (fallback):', error);
-      res.status(500).json({
-        error: 'Erro interno do servidor',
-        message: error.message
-      });
-    }
-  });
-
-  app.get('/api/dashboard/vendas', async (req, res) => {
-    try {
-      console.log('📈 GET /api/dashboard/vendas (fallback)');
-      
-      // Check for authorization header
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Token de acesso requerido' });
-      }
-      
-      // Mock de dados de vendas
-      const vendasMock = {
-        vendas_por_dia: [
-          { data: '2025-01-10', faturamento: '450.50', pedidos: 18 },
-          { data: '2025-01-09', faturamento: '380.20', pedidos: 15 },
-          { data: '2025-01-08', faturamento: '520.80', pedidos: 22 },
-          { data: '2025-01-07', faturamento: '290.30', pedidos: 12 },
-          { data: '2025-01-06', faturamento: '410.90', pedidos: 17 }
-        ],
-        produtos_mais_vendidos: [
-          { produto: 'X-Burger Clássico', total_vendido: 25, faturamento: '472.50' },
-          { produto: 'Pizza Margherita', total_vendido: 12, faturamento: '420.00' },
-          { produto: 'Coca-Cola 350ml', total_vendido: 35, faturamento: '175.00' },
-          { produto: 'Pudim de Leite', total_vendido: 18, faturamento: '153.00' }
-        ]
-      };
-      
-      res.json(vendasMock);
-      
-    } catch (error) {
-      console.error('❌ Erro ao obter relatório de vendas (fallback):', error);
-      res.status(500).json({
-        error: 'Erro interno do servidor',
-        message: error.message
-      });
-    }
-  });
 }
 
 // ============ 404 HANDLER ============
@@ -613,9 +517,7 @@ app.use('*', (req, res) => {
       'POST /api/pedidos',
       'GET /api/pedidos',
       'GET /api/pedidos/:id',
-      'PUT /api/pedidos/:id/status',
-      'GET /api/dashboard/stats',
-      'GET /api/dashboard/vendas'
+      'PUT /api/pedidos/:id/status'
     ]
   });
 });
@@ -646,8 +548,6 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`   GET  /api/pedidos`);
     console.log(`   GET  /api/pedidos/:id`);
     console.log(`   PUT  /api/pedidos/:id/status`);
-    console.log(`   GET  /api/dashboard/stats`);
-    console.log(`   GET  /api/dashboard/vendas`);
   });
 
   // Graceful shutdown
