@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { render } from '../tests/test-utils';
-import App from '../App';
+import { render } from '../../tests/test-utils';
+import App from '../../App';
 
 // Mock das APIs
 vi.mock('../services/api', () => ({

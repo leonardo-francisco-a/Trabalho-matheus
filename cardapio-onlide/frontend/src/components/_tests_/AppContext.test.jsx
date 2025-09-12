@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, within } from '@testing-library/react';
 import { render } from '../../tests/test-utils';
 import ProductGrid from '../ProductGrid';
+import userEvent from '@testing-library/user-event';
 
 describe('ProductGrid Component', () => {
   const mockOnAddToCart = vi.fn();
@@ -121,23 +122,32 @@ describe('ProductGrid Component', () => {
     const pizzaCard = screen.getByText('Pizza Margherita').closest('.product-card');
     expect(pizzaCard).toHaveClass('unavailable');
     
-    const indisponivelButton = screen.getByText('Indisponível');
+    const indisponivelButton = screen.getByRole('button', { name: 'Indisponível' });
     expect(indisponivelButton).toBeDisabled();
   });
 
-  it('deve chamar onAddToCart ao clicar em adicionar', () => {
-    render(
-      <ProductGrid 
-        produtos={mockProdutos}
-        selectedCategory={mockSelectedCategory}
-        onAddToCart={mockOnAddToCart}
-        loading={false}
-      />
-    );
+  it('deve chamar onAddToCart ao clicar em adicionar', async () => {
+  render(
+    <ProductGrid 
+      produtos={mockProdutos}
+      selectedCategory={mockSelectedCategory}
+      onAddToCart={mockOnAddToCart}
+      loading={false}
+    />
+  );
 
-    const addButton = screen.getByText('Adicionar');
-    fireEvent.click(addButton);
+  // Seleciona o botão "Adicionar"
+  const addButton = screen.getByRole('button', { name: 'Adicionar' });
+  expect(addButton).not.toBeDisabled();
 
-    expect(mockOnAddToCart).toHaveBeenCalledWith(mockProdutos[0]);
-  });
+  // Descobre qual produto ele representa
+  const productCard = addButton.closest('.product-card');
+  const productName = within(productCard).getByRole('heading').textContent;
+  const clickedProduct = mockProdutos.find(p => p.nome === productName);
+
+  await userEvent.click(addButton);
+
+  expect(mockOnAddToCart).toHaveBeenCalledTimes(1);
+  expect(mockOnAddToCart).toHaveBeenCalledWith(clickedProduct);
+});
 });

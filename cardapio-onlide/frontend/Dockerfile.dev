@@ -8,6 +8,8 @@ COPY package*.json ./
 # Remover qualquer lock file e node_modules existente
 RUN rm -rf node_modules package-lock.json || true
 
+RUN npm install -D @testing-library/user-event
+
 # Instalar dependências
 RUN npm install
 

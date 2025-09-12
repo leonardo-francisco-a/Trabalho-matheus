@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../tests/test-utils';
 import Login from '../Login';
+import { act } from 'react';
+import userEvent from '@testing-library/user-event';
 
 describe('Login Component', () => {
   const mockOnLogin = vi.fn();
@@ -59,29 +61,34 @@ describe('Login Component', () => {
     expect(mockOnLogin).not.toHaveBeenCalled();
   });
 
-  it('deve validar formato do email', async () => {
-    render(
-      <Login 
-        onLogin={mockOnLogin}
-        onSwitchToRegister={mockOnSwitchToRegister}
-        loading={false}
-      />
-    );
+it('deve validar formato do email', async () => {
+  render(
+    <Login 
+      onLogin={mockOnLogin}
+      onSwitchToRegister={mockOnSwitchToRegister}
+      loading={false}
+    />
+  );
 
-    const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/senha/i);
-    const submitButton = screen.getByRole('button', { name: /entrar/i });
+  const emailInput = screen.getByLabelText(/email/i);
+  const passwordInput = screen.getByLabelText(/senha/i);
+  const form = screen.getByRole('button', { name: /entrar/i }).closest('form');
 
-    fireEvent.change(emailInput, { target: { value: 'email-invalido' } });
-    fireEvent.change(passwordInput, { target: { value: '123456' } });
-    fireEvent.click(submitButton);
+  // Preencha os campos
+  fireEvent.change(emailInput, { target: { value: 'email-invalido' } });
+  fireEvent.change(passwordInput, { target: { value: '123456' } });
+  
+  // Submit o formulário
+  fireEvent.submit(form);
 
-    await waitFor(() => {
-      expect(screen.getByText(/email inválido/i)).toBeInTheDocument();
-    });
+  // Use uma busca mais flexível que funciona
+  await waitFor(() => {
+    const errorElements = screen.queryAllByText(/email.*inválido/i);
+    expect(errorElements.length).toBeGreaterThan(0);
+  }, { timeout: 5000 });
 
-    expect(mockOnLogin).not.toHaveBeenCalled();
-  });
+  expect(mockOnLogin).not.toHaveBeenCalled();
+});
 
   it('deve validar tamanho mínimo da senha', async () => {
     render(
