@@ -1,3 +1,4 @@
+cat > .github/workflows/ci-basic.yml << 'EOF'
 name: 🧪 Basic CI Pipeline
 on: [push, pull_request]
 
@@ -14,22 +15,23 @@ jobs:
           node-version: '18'
       
       - name: 📦 Install Frontend Dependencies
-        working-directory: ./frontend
+        working-directory: ./cardapio-onlide/frontend
         run: npm ci
       
       - name: 📦 Install Backend Dependencies
-        working-directory: ./backend
+        working-directory: ./cardapio-onlide/backend
         run: npm ci
       
       - name: 🧪 Test Frontend
-        working-directory: ./frontend
+        working-directory: ./cardapio-onlide/frontend
         run: npm test -- --watchAll=false || echo "⚠️ Frontend tests not configured yet"
         
       - name: 🧪 Test Backend
-        working-directory: ./backend
+        working-directory: ./cardapio-onlide/backend
         run: npm test || echo "⚠️ Backend tests not configured yet"
         
       - name: 🐳 Build Docker Images
+        working-directory: ./cardapio-onlide
         run: |
           echo "🏗️ Building frontend image..."
           docker build -f frontend/Dockerfile.dev -t cardapio-frontend:test ./frontend
@@ -44,3 +46,4 @@ jobs:
           echo "✅ Backend testado" 
           echo "✅ Docker images criadas"
           echo "🚀 Pronto para Google Cloud!"
+EOF
