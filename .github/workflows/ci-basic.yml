@@ -15,19 +15,25 @@ jobs:
       
       - name: 📦 Install Frontend Dependencies
         working-directory: ./cardapio-onlide/frontend
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
+          # Fix Rollup issue specifically
+          npm install @rollup/rollup-linux-x64-gnu --save-dev
       
       - name: 📦 Install Backend Dependencies
         working-directory: ./cardapio-onlide/backend
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
       
       - name: 🧪 Test Frontend
         working-directory: ./cardapio-onlide/frontend
-        run: npm test -- --run || echo "⚠️ Frontend tests not configured yet"
+        run: npm test -- --run
         
       - name: 🧪 Test Backend
         working-directory: ./cardapio-onlide/backend
-        run: npm test || echo "⚠️ Backend tests not configured yet"
+        run: npm test
         
       - name: 🐳 Build Docker Images
         working-directory: ./cardapio-onlide
@@ -37,11 +43,11 @@ jobs:
           
           echo "🏗️ Building backend image..."
           docker build -f backend/Dockerfile.dev -t cardapio-backend:test ./backend
-          
+        
       - name: ✅ Pipeline Success
         run: |
-          echo "🎉 Pipeline passou com sucesso!"
-          echo "✅ Frontend testado"
-          echo "✅ Backend testado" 
-          echo "✅ Docker images criadas"
-          echo "🚀 Pronto para Google Cloud!"
+          echo "🎉 All tests passed!"
+          echo "✅ Frontend tests working"
+          echo "✅ Backend tests working" 
+          echo "✅ Docker builds working"
+          echo "🚀 Ready for Google Cloud!"
