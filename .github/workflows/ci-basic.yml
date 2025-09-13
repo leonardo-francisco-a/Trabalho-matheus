@@ -23,7 +23,7 @@ jobs:
       
       - name: 🧪 Test Frontend
         working-directory: ./cardapio-onlide/frontend
-        run: npm test -- --watchAll=false || echo "⚠️ Frontend tests not configured yet"
+        run: npm test -- --run || echo "⚠️ Frontend tests not configured yet"
         
       - name: 🧪 Test Backend
         working-directory: ./cardapio-onlide/backend
