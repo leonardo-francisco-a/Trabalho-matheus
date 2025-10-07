@@ -133,11 +133,6 @@ function Login({ onLogin, onSwitchToRegister, loading }) {
           </p>
         </div>
         
-        <div className="demo-info">
-          <h4>👨‍💻 Demo - Dados para teste:</h4>
-          <p>Email: <strong>admin@cardapio.com</strong></p>
-          <p>Senha: <strong>admin123</strong></p>
-        </div>
       </div>
     </div>
   );
