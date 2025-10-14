@@ -1,0 +1,27 @@
+# Exemplo de arquivo de variáveis
+# Copie este arquivo para terraform.tfvars e preencha com seus valores
+
+# OBRIGATÓRIO: Seu ID do projeto no Google Cloud
+project_id = "cardapio-onlide"
+
+# Região (opcional, padrão: us-central1)
+region = "us-central1"
+
+# Ambiente (dev, staging, prod)
+environment = "prod"
+
+# Nome da aplicação
+app_name = "cardapio"
+
+# Database
+database_name     = "cardapio_db"
+database_user     = "cardapio_user"
+database_password = "Cardap!o@Prod2024#SecureDB" # MUDE ISSO!
+
+# JWT Secret (gere um aleatório seguro)
+jwt_secret = "a8f5d2c9e4b7f3a1d6c8e9b2f5a7c3d9" # MUDE ISSO!
+
+# Imagens Docker (serão criadas pelo GitHub Actions)
+# Substitua PROJECT_ID pelo seu ID do projeto
+backend_image  = "gcr.io/cardapio-onlide/cardapio-backend:latest"
+frontend_image = "gcr.io/cardapio-onlide/cardapio-frontend:latest
