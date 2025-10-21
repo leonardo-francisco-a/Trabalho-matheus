@@ -105,10 +105,6 @@ resource "google_cloud_run_service" "backend" {
           value = "production"
         }
         
-        env {
-          name  = "PORT"
-          value = "3001"
-        }
         
         env {
           name  = "DB_HOST"
