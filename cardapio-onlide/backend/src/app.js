@@ -7,8 +7,15 @@ const PORT = process.env.PORT || 3001;
 
 // ============ MIDDLEWARES ============
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://cardapio-frontend-prod-791776403069.us-central1.run.app', // ✅ Seu frontend
+    /\.run\.app$/ // ✅ Permite qualquer domínio .run.app
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 

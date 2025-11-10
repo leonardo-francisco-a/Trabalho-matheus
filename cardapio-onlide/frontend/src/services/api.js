@@ -3,9 +3,9 @@ import toast from 'react-hot-toast';
 
 // Configuração base do axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 
-         (import.meta.env.MODE === 'production' 
-           ? 'https://cardapio-backend-prod-uqktbqtlka-uc.a.run.app/api'
+  baseURL: import.meta.env.VITE_API_URL ||
+         (import.meta.env.MODE === 'production'
+           ? 'https://cardapio-backend-prod-791776403069.us-central1.run.app/api'
            : 'http://localhost:3001/api'),
   timeout: 10000,
   headers: {

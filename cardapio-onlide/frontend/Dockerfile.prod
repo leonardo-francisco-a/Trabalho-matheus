@@ -13,7 +13,7 @@ RUN npm ci
 # Copiar código fonte
 COPY . .
 
-ENV VITE_API_URL=https://cardapio-backend-prod-uqktbqtlka-uc.a.run.app
+ENV VITE_API_URL=https://cardapio-backend-prod-791776403069.us-central1.run.app/api
 
 # Build da aplicação para produção
 RUN npm run build

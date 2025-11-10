@@ -110,7 +110,7 @@ function MainContent() {
     if (state.isAuthenticated && state.categorias.length === 0) {
       actions.loadInitialData()
     }
-  }, [state.isAuthenticated, state.categorias.length, actions])
+  }, [state.isAuthenticated, state.categorias.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const renderPageContent = () => {
     switch (currentRoute) {
