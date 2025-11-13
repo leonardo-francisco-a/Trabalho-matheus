@@ -35,10 +35,10 @@ jobs:
       - name: 🏗️ Build Frontend
         run: |
           docker build \
-            -f frontend/Dockerfile.prod \
+            -f cardapio-onlide/frontend/Dockerfile.prod \
             -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/cloud-run-source-deploy/${{ env.FRONTEND_SERVICE }}:${{ github.sha }} \
             -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/cloud-run-source-deploy/${{ env.FRONTEND_SERVICE }}:latest \
-            ./frontend
+            ./cardapio-onlide/frontend
 
       - name: 📤 Push Frontend Image
         run: |
@@ -58,10 +58,10 @@ jobs:
       - name: 🏗️ Build Backend
         run: |
           docker build \
-            -f backend/Dockerfile.prod \
+            -f cardapio-onlide/backend/Dockerfile.prod \
             -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/cloud-run-source-deploy/${{ env.BACKEND_SERVICE }}:${{ github.sha }} \
             -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/cloud-run-source-deploy/${{ env.BACKEND_SERVICE }}:latest \
-            ./backend
+            ./cardapio-onlide/backend
 
       - name: 📤 Push Backend Image
         run: |
