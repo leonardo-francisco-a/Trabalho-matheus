@@ -1,4 +1,4 @@
-// Script para verificar a conexão com o backend
+
 import { testConnection } from './src/services/api.js';
 
 const checkBackendConnection = async () => {

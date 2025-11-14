@@ -136,11 +136,11 @@ describe('ProductGrid Component', () => {
     />
   );
 
-  // Seleciona o botão "Adicionar"
+  
   const addButton = screen.getByRole('button', { name: 'Adicionar' });
   expect(addButton).not.toBeDisabled();
 
-  // Descobre qual produto ele representa
+  
   const productCard = addButton.closest('.product-card');
   const productName = within(productCard).getByRole('heading').textContent;
   const clickedProduct = mockProdutos.find(p => p.nome === productName);

@@ -4,15 +4,15 @@ async function testDatabase() {
   try {
     console.log('🔄 Testando conexão com banco...');
     
-    // Testar conexão
+    
     await sequelize.authenticate();
     console.log('✅ Conexão estabelecida');
     
-    // Testar sincronização
+    
     await sequelize.sync({ force: true });
     console.log('✅ Tabelas criadas');
     
-    // Verificar tabelas
+    
     const tables = await sequelize.getQueryInterface().showAllTables();
     console.log('📋 Tabelas criadas:', tables);
     

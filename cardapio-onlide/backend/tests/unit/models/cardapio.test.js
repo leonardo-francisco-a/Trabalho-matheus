@@ -1,12 +1,12 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
-// Configurar banco em memória para testes
+
 const sequelize = new Sequelize('sqlite::memory:', {
   dialect: 'sqlite',
   logging: false
 });
 
-// Definir modelo Categoria para teste
+
 const Categoria = sequelize.define('Categoria', {
   id: {
     type: DataTypes.INTEGER,
@@ -32,7 +32,7 @@ const Categoria = sequelize.define('Categoria', {
   tableName: 'categorias'
 });
 
-// Definir modelo Cardapio para teste
+
 const Cardapio = sequelize.define('Cardapio', {
   id: {
     type: DataTypes.INTEGER,
@@ -78,7 +78,7 @@ const Cardapio = sequelize.define('Cardapio', {
   tableName: 'cardapio'
 });
 
-// Relacionamentos
+
 Categoria.hasMany(Cardapio, { foreignKey: 'categoria_id', as: 'itens' });
 Cardapio.belongsTo(Categoria, { foreignKey: 'categoria_id', as: 'categoria' });
 
@@ -95,11 +95,11 @@ describe('Cardapio Model', () => {
   });
 
   beforeEach(async () => {
-    // Limpar dados
+    
     await Cardapio.destroy({ where: {} });
     await Categoria.destroy({ where: {} });
 
-    // Criar categoria para testes
+    
     categoria = await Categoria.create({
       nome: 'Lanches',
       descricao: 'Hambúrguers e sanduíches'
@@ -120,7 +120,7 @@ describe('Cardapio Model', () => {
     expect(item.nome).toBe(itemData.nome);
     expect(parseFloat(item.preco)).toBe(itemData.preco);
     expect(item.categoria_id).toBe(categoria.id);
-    expect(item.disponivel).toBe(true); // Default
+    expect(item.disponivel).toBe(true); 
   });
 
   it('deve validar preço mínimo', async () => {
@@ -132,13 +132,13 @@ describe('Cardapio Model', () => {
   });
 
   it('deve validar campos obrigatórios', async () => {
-    // Nome obrigatório
+    
     await expect(Cardapio.create({
       preco: 10.00,
       categoria_id: categoria.id
     })).rejects.toThrow();
 
-    // Preço obrigatório
+    
     await expect(Cardapio.create({
       nome: 'Test Item',
       categoria_id: categoria.id

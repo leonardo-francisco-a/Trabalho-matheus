@@ -2,26 +2,26 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService, cardapioService, pedidosService } from '../services/api';
 import toast from 'react-hot-toast';
 
-// Estados iniciais
+
 const initialState = {
-  // Auth
+  
   isAuthenticated: false,
   user: null,
   token: null,
   
-  // Loading states
+  
   loading: false,
   authLoading: true,
   
-  // Produtos e categorias
+  
   produtos: [],
   categorias: [],
   selectedCategory: { id: 'all', nome: 'Todos' },
   
-  // Pedidos
+  
   pedidos: [],
   
-  // Busca e filtros
+  
   searchTerm: '',
   filters: {
     disponivel: 'all',
@@ -30,50 +30,50 @@ const initialState = {
     categoria: 'all'
   },
   
-  // Carrinho
+  
   cartItems: [],
   
-  // UI
+  
   currentView: 'login',
 };
 
-// Actions
+
 const ActionTypes = {
-  // Auth
+  
   SET_AUTH_LOADING: 'SET_AUTH_LOADING',
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
   LOGOUT: 'LOGOUT',
   SET_USER: 'SET_USER',
   
-  // Loading
+  
   SET_LOADING: 'SET_LOADING',
   
-  // Produtos
+  
   SET_PRODUTOS: 'SET_PRODUTOS',
   SET_CATEGORIAS: 'SET_CATEGORIAS',
   SET_SELECTED_CATEGORY: 'SET_SELECTED_CATEGORY',
   
-  // Pedidos
+  
   SET_PEDIDOS: 'SET_PEDIDOS',
   ADD_PEDIDO: 'ADD_PEDIDO',
   UPDATE_PEDIDO_STATUS: 'UPDATE_PEDIDO_STATUS',
   
-  // Busca e filtros
+  
   SET_SEARCH_TERM: 'SET_SEARCH_TERM',
   SET_FILTERS: 'SET_FILTERS',
   CLEAR_SEARCH_AND_FILTERS: 'CLEAR_SEARCH_AND_FILTERS',
   
-  // Carrinho
+  
   ADD_TO_CART: 'ADD_TO_CART',
   UPDATE_CART_ITEM: 'UPDATE_CART_ITEM',
   REMOVE_FROM_CART: 'REMOVE_FROM_CART',
   CLEAR_CART: 'CLEAR_CART',
   
-  // UI
+  
   SET_CURRENT_VIEW: 'SET_CURRENT_VIEW',
 };
 
-// Reducer
+
 function appReducer(state, action) {
   switch (action.type) {
     case ActionTypes.SET_AUTH_LOADING:
@@ -111,7 +111,7 @@ function appReducer(state, action) {
       return { 
         ...state, 
         selectedCategory: action.payload,
-        // Limpar busca quando trocar de categoria
+        
         searchTerm: '',
         filters: {
           disponivel: 'all',
@@ -208,14 +208,14 @@ function appReducer(state, action) {
   }
 }
 
-// Context
+
 const AppContext = createContext(null);
 
-// Provider
+
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   
-  // Verificar autenticação ao carregar
+  
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
@@ -223,7 +223,7 @@ export function AppProvider({ children }) {
       
       if (token && userData) {
         try {
-          // Se temos dados salvos, usá-los imediatamente
+          
           const user = JSON.parse(userData);
           dispatch({
             type: ActionTypes.LOGIN_SUCCESS,
@@ -243,14 +243,14 @@ export function AppProvider({ children }) {
     checkAuth();
   }, []);
   
-  // Actions
+  
   const actions = {
-    // Auth actions
+    
     login: async (email, senha) => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
         
-        // USAR API REAL em vez de mock
+        
         const response = await authService.login(email, senha);
         
         localStorage.setItem('token', response.token);
@@ -268,7 +268,7 @@ export function AppProvider({ children }) {
         return response;
         
       } catch (error) {
-        // Fallback para mock apenas se API falhar
+        
         console.warn('⚠️ API falhou, tentando mock:', error.message);
         
         if (email === 'admin@cardapio.com' && senha === 'admin123') {
@@ -308,7 +308,7 @@ export function AppProvider({ children }) {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
         
-        // USAR API REAL em vez de mock
+        
         const response = await authService.register(
           userData.name, 
           userData.email, 
@@ -345,23 +345,23 @@ export function AppProvider({ children }) {
       toast.success('Logout realizado com sucesso!');
     },
     
-    // Carregar dados iniciais
+    
     loadInitialData: async () => {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
         
-        // Tentar carregar dados reais da API
+        
         try {
-          // Carregar categorias da API
+          
           const categoriasResponse = await cardapioService.listarCategorias();
           let categorias = categoriasResponse || [];
           
-          // Adicionar categoria "Todos" se não existir
+          
           if (!categorias.find(cat => cat.id === 'all')) {
             categorias = [{ id: 'all', nome: 'Todos' }, ...categorias];
           }
           
-          // Carregar produtos da API
+          
           const produtosResponse = await cardapioService.listarItens();
           const produtos = produtosResponse?.itens || [];
           
@@ -373,7 +373,7 @@ export function AppProvider({ children }) {
         } catch (apiError) {
           console.warn('⚠️ API indisponível, usando dados mockados:', apiError.message);
           
-          // Fallback para dados mockados
+          
           const categorias = [
             { id: 'all', nome: 'Todos' },
             { id: 1, nome: 'Lanches' },
@@ -500,7 +500,7 @@ export function AppProvider({ children }) {
       }
     },
     
-    // UI actions
+    
     setCurrentView: (view) => {
       dispatch({ type: ActionTypes.SET_CURRENT_VIEW, payload: view });
     },
@@ -509,7 +509,7 @@ export function AppProvider({ children }) {
       dispatch({ type: ActionTypes.SET_SELECTED_CATEGORY, payload: category });
     },
 
-    // Search and filter actions
+    
     setSearchTerm: (term) => {
       dispatch({ type: ActionTypes.SET_SEARCH_TERM, payload: term });
     },
@@ -522,7 +522,7 @@ export function AppProvider({ children }) {
       dispatch({ type: ActionTypes.CLEAR_SEARCH_AND_FILTERS });
     },
     
-    // Carrinho actions
+    
     addToCart: (produto) => {
       dispatch({ type: ActionTypes.ADD_TO_CART, payload: produto });
       toast.success(`${produto.nome} adicionado ao carrinho!`);
@@ -545,14 +545,14 @@ export function AppProvider({ children }) {
       toast.success('Carrinho limpo');
     },
     
-    // Pedidos actions
+    
     loadPedidos: async () => {
       try {
         const response = await pedidosService.listarPedidos();
         dispatch({ type: ActionTypes.SET_PEDIDOS, payload: response.pedidos || [] });
       } catch (error) {
         console.warn('Erro ao carregar pedidos da API:', error);
-        // Manter pedidos existentes no estado local
+        
       }
     },
     
@@ -574,7 +574,7 @@ export function AppProvider({ children }) {
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: true });
         
-        // Tentar criar pedido via API
+        
         try {
           const response = await pedidosService.criarPedido({
             cliente_nome: orderData.cliente_nome,
@@ -585,7 +585,7 @@ export function AppProvider({ children }) {
             itens: orderData.itens
           });
           
-          // Adicionar o pedido ao estado local
+          
           dispatch({ type: ActionTypes.ADD_PEDIDO, payload: response.pedido });
           dispatch({ type: ActionTypes.CLEAR_CART });
           toast.success(`Pedido ${response.pedido.numero_pedido} criado com sucesso!`);
@@ -595,11 +595,11 @@ export function AppProvider({ children }) {
         } catch (apiError) {
           console.warn('⚠️ API indisponível para criar pedido, simulando:', apiError.message);
           
-          // Fallback para simulação
+          
           const numeroPedido = `PED${Date.now().toString().slice(-6)}`;
           const total = state.cartItems.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
           
-          // Criar pedido simulado
+          
           const pedidoSimulado = {
             id: Date.now(),
             numero_pedido: numeroPedido,
@@ -623,7 +623,7 @@ export function AppProvider({ children }) {
           
           console.log('🍽️ Pedido simulado criado:', pedidoSimulado);
           
-          // Adicionar ao estado local
+          
           dispatch({ type: ActionTypes.ADD_PEDIDO, payload: pedidoSimulado });
           dispatch({ type: ActionTypes.CLEAR_CART });
           toast.success(`Pedido ${numeroPedido} criado com sucesso! (modo demo)`);
@@ -648,7 +648,7 @@ export function AppProvider({ children }) {
   );
 }
 
-// Hook personalizado para usar o contexto
+
 export function useApp() {
   const context = useContext(AppContext);
   if (!context) {
@@ -657,5 +657,5 @@ export function useApp() {
   return context;
 }
 
-// Exportação padrão
+
 export default AppContext;

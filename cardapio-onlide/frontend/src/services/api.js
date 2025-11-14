@@ -1,7 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Configuração base do axios
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ||
          (import.meta.env.MODE === 'production'
@@ -13,7 +13,7 @@ const api = axios.create({
   }
 });
 
-// Interceptor para adicionar token nas requisições
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -29,7 +29,7 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para tratar respostas
+
 api.interceptors.response.use(
   (response) => {
     console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
@@ -46,7 +46,7 @@ api.interceptors.response.use(
       toast.error('Sessão expirada. Faça login novamente.');
     }
     
-    // Se for erro de rede, mostrar mensagem mais amigável
+    
     if (!error.response) {
       toast.error('Erro de conexão. Verifique se o backend está rodando.');
     }
@@ -55,7 +55,7 @@ api.interceptors.response.use(
   }
 );
 
-// ==================== AUTH SERVICES ====================
+
 export const authService = {
   login: async (email, senha) => {
     try {
@@ -76,7 +76,7 @@ export const authService = {
         senha
       };
       
-      // Adicionar telefone apenas se fornecido
+      
       if (telefone && telefone.trim()) {
         requestData.telefone = telefone;
       }
@@ -101,7 +101,7 @@ export const authService = {
   }
 };
 
-// ==================== CARDAPIO SERVICES ====================
+
 export const cardapioService = {
   listarItens: async (categoria_id = null) => {
     try {
@@ -134,7 +134,7 @@ export const cardapioService = {
   }
 };
 
-// ==================== PEDIDOS SERVICES ====================
+
 export const pedidosService = {
   criarPedido: async (pedidoData) => {
     try {
@@ -174,7 +174,7 @@ export const pedidosService = {
   }
 };
 
-// ==================== DASHBOARD SERVICES ====================
+
 export const dashboardService = {
   obterEstatisticas: async () => {
     try {
@@ -199,7 +199,7 @@ export const dashboardService = {
   }
 };
 
-// ==================== UTILS ====================
+
 export const testConnection = async () => {
   try {
     const response = await api.get('/health');

@@ -126,7 +126,7 @@ describe('ProductGrid Component', () => {
         descricao: 'Pizza com molho, mussarela e manjericão',
         preco: 35.00,
         categoria_id: 2,
-        disponivel: false, // Produto indisponível
+        disponivel: false, 
         tempo_preparo: 25,
         categoria: { id: 2, nome: 'Pizzas' }
       }
@@ -144,7 +144,7 @@ describe('ProductGrid Component', () => {
     const pizzaCard = screen.getByText('Pizza Margherita').closest('.product-card');
     expect(pizzaCard).toHaveClass('unavailable');
 
-    // Procure especificamente pelo botão com "Indisponível"
+    
     const indisponivelButton = screen.getByRole('button', { name: /indisponível/i });
     expect(indisponivelButton).toBeDisabled();
     expect(indisponivelButton).toHaveClass('disabled');
@@ -160,17 +160,17 @@ describe('ProductGrid Component', () => {
       />
     );
 
-    // Procure pelo botão "Adicionar"
+    
     const addButton = screen.getByRole('button', { name: /adicionar/i });
     fireEvent.click(addButton);
 
-    // Verifique se foi chamado (não importa com qual produto exatamente)
+    
     expect(mockOnAddToCart).toHaveBeenCalledTimes(1);
     
-    // Pegar o produto que foi realmente passado
+    
     const productoPassed = mockOnAddToCart.mock.calls[0][0];
     
-    // Verificar se é um produto válido e disponível
+    
     expect(productoPassed).toHaveProperty('id');
     expect(productoPassed).toHaveProperty('nome');
     expect(productoPassed.disponivel).toBe(true);

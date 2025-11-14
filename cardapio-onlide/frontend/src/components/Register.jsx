@@ -19,7 +19,7 @@ function Register({ onRegister, onSwitchToLogin, loading }) {
       [name]: value
     }));
     
-    // Limpar erro do campo quando usuário digita
+    
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -63,10 +63,10 @@ function Register({ onRegister, onSwitchToLogin, loading }) {
   };
 
   const formatPhone = (value) => {
-    // Remove tudo que não é número
+    
     const numbers = value.replace(/\D/g, '');
     
-    // Aplica máscara
+    
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
     if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
@@ -98,7 +98,7 @@ function Register({ onRegister, onSwitchToLogin, loading }) {
         telefone: formData.telefone || undefined
       });
     } catch (error) {
-      // Error is handled by context/toast
+      
       console.error('Register error:', error);
     }
   };

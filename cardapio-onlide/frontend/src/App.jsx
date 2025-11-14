@@ -13,7 +13,6 @@ import Dashboard from './components/Dashboard'
 import LoadingSpinner from './components/LoadingSpinner'
 import PedidosPage from './components/PedidosPage'
 
-// Componente das configurações (mantido da versão anterior)
 const ConfiguracoesPage = () => {
   return (
     <div className="page">
@@ -100,17 +99,17 @@ const ConfiguracoesPage = () => {
   )
 }
 
-// Componente principal do conteúdo
+
 function MainContent() {
   const { state, actions } = useApp()
   const { currentRoute, navigate } = useRouter()
 
-  // Carregar dados iniciais quando autenticado
+
   useEffect(() => {
     if (state.isAuthenticated && state.categorias.length === 0) {
       actions.loadInitialData()
     }
-  }, [state.isAuthenticated, state.categorias.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state.isAuthenticated, state.categorias.length])
 
   const renderPageContent = () => {
     switch (currentRoute) {
@@ -193,16 +192,13 @@ function MainContent() {
   )
 }
 
-// Componente App principal
 function App() {
   const { state, actions } = useApp()
 
-  // Loading inicial de autenticação
   if (state.authLoading) {
     return <LoadingSpinner message="Verificando autenticação..." />
   }
 
-  // Telas de autenticação
   if (!state.isAuthenticated) {
     if (state.currentView === 'register') {
       return (
@@ -223,7 +219,6 @@ function App() {
     )
   }
 
-  // App principal após login com router
   return (
     <RouterProvider>
       <MainContent />

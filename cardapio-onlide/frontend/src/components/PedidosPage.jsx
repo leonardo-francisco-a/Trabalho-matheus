@@ -10,7 +10,7 @@ const PedidosPage = () => {
   });
   const [selectedPedido, setSelectedPedido] = useState(null);
 
-  // Atualizar lista filtrada quando pedidos ou filtros mudarem
+  
   useEffect(() => {
     filterPedidos();
   }, [state.pedidos, filters]);
@@ -18,12 +18,12 @@ const PedidosPage = () => {
   const filterPedidos = () => {
     let pedidos = state.pedidos || [];
     
-    // Filtrar por status
+    
     if (filters.status !== 'todos') {
       pedidos = pedidos.filter(pedido => pedido.status === filters.status);
     }
     
-    // Filtrar por período
+    
     const hoje = new Date();
     const ontem = new Date(hoje);
     ontem.setDate(hoje.getDate() - 1);
@@ -61,7 +61,7 @@ const PedidosPage = () => {
         break;
     }
     
-    // Ordenar por data mais recente primeiro
+    
     pedidos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
     setFilteredPedidos(pedidos);

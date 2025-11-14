@@ -1,5 +1,5 @@
-// backend/test-imports.js
-// Script para testar se todos os imports estão funcionando
+
+
 
 console.log('🔄 Testando imports...');
 
@@ -31,7 +31,7 @@ try {
   console.error('❌ Erro nos imports:', error.message);
   console.error('Stack:', error.stack);
   
-  // Tentar identificar o problema específico
+  
   if (error.message.includes('Cannot find module')) {
     console.error('🔍 Módulo não encontrado. Verifique se todos os arquivos existem.');
   }

@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
 
-// Context de roteamento
+
 const RouterContext = createContext();
 
-// Provider do router
+
 export function RouterProvider({ children }) {
-  const [currentRoute, setCurrentRoute] = useState('dashboard'); // Iniciar no dashboard
+  const [currentRoute, setCurrentRoute] = useState('dashboard'); 
   
   const navigate = (route) => {
     console.log(`🧭 Navegando para: ${route}`);
@@ -19,7 +19,7 @@ export function RouterProvider({ children }) {
   );
 }
 
-// Hook para usar o router
+
 export function useRouter() {
   const context = useContext(RouterContext);
   if (!context) {

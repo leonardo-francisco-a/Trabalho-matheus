@@ -5,13 +5,13 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ============ MIDDLEWARES ============
+
 app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://cardapio-frontend-prod-791776403069.us-central1.run.app', // ✅ Seu frontend
-    /\.run\.app$/ // ✅ Permite qualquer domínio .run.app
+    'https://cardapio-frontend-prod-791776403069.us-central1.run.app', 
+    /\.run\.app$/ 
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -19,7 +19,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ============ ROTAS DE HEALTH ============
+
 app.get('/', (req, res) => {
   res.json({ 
     message: '🍽️ Backend Sistema de Cardápio funcionando!',
@@ -36,9 +36,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ============ ROTAS REAIS ============
+
 try {
-  // Importar e usar rotas reais se modelos estiverem disponíveis
+  
   const authRoutes = require('./routes/auth');
   const cardapioRoutes = require('./routes/cardapio');
   const pedidosRoutes = require('./routes/pedidos');
@@ -54,8 +54,8 @@ try {
 } catch (error) {
   console.warn('⚠️ Rotas reais indisponíveis, usando fallback:', error.message);
 
-  // ============ FALLBACK ROUTES ============
-  // Auth routes
+  
+  
   app.post('/api/auth/login', async (req, res) => {
     try {
       console.log('🔐 POST /api/auth/login', req.body);
@@ -68,7 +68,7 @@ try {
         });
       }
 
-      // Mock login básico
+      
       if (email === 'admin@cardapio.com' && senha === 'admin123') {
         res.json({
           message: 'Login realizado com sucesso',
@@ -95,7 +95,7 @@ try {
       console.log('📝 POST /api/auth/register', req.body);
       const { nome, email, senha, telefone } = req.body;
       
-      // Validação básica
+      
       if (!nome || !email || !senha) {
         return res.status(400).json({ 
           error: 'Dados inválidos',
@@ -125,7 +125,7 @@ try {
         });
       }
 
-      // Mock register
+      
       const usuario = {
         id: Date.now(),
         nome,
@@ -148,7 +148,7 @@ try {
     }
   });
 
-  // Cardapio routes
+  
   app.get('/api/cardapio/categorias', async (req, res) => {
     try {
       console.log('📂 GET /api/cardapio/categorias');
@@ -198,7 +198,7 @@ try {
         }
       ];
 
-      // Aplicar filtro de disponibilidade se fornecido
+      
       let filteredProducts = produtos;
       if (req.query.disponivel !== undefined) {
         const isAvailable = req.query.disponivel === 'true';
@@ -218,12 +218,12 @@ try {
     }
   });
 
-  // POST route for cardapio (authenticated)
+  
   app.post('/api/cardapio', async (req, res) => {
     try {
       console.log('➕ POST /api/cardapio', req.body);
       
-      // Check for authorization header
+      
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Token de acesso requerido' });
@@ -231,7 +231,7 @@ try {
 
       const { nome, preco, categoria_id } = req.body;
       
-      // Validate required fields
+      
       if (!nome) {
         return res.status(400).json({ 
           error: 'Dados inválidos',
@@ -246,7 +246,7 @@ try {
         });
       }
 
-      // Mock creation
+      
       const novoItem = {
         id: Date.now(),
         nome,
@@ -272,7 +272,7 @@ try {
   });
 }
 
-// ============ 404 HANDLER ============
+
 app.use('*', (req, res) => {
   console.log('❌ 404:', req.method, req.originalUrl);
   res.status(404).json({
@@ -290,7 +290,7 @@ app.use('*', (req, res) => {
   });
 });
 
-// ============ ERROR HANDLER ============
+
 app.use((error, req, res, next) => {
   console.error('❌ Server Error:', error);
   res.status(500).json({
@@ -299,7 +299,7 @@ app.use((error, req, res, next) => {
   });
 });
 
-// ============ START SERVER ============
+
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Backend rodando na porta ${PORT}`);
@@ -314,7 +314,7 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`   POST /api/cardapio`);
   });
 
-  // Graceful shutdown
+  
   process.on('SIGTERM', () => {
     console.log('🛑 Recebido SIGTERM, fechando servidor...');
     server.close(() => {

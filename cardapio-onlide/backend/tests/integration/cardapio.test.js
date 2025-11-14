@@ -1,12 +1,12 @@
 const request = require('supertest');
 const app = require('../../src/app');
 
-// Mock simples para não depender do banco real (igual ao auth.test.js)
+
 const mockUsers = new Map();
 const mockCategorias = new Map();
 const mockCardapio = new Map();
 
-// Mock dos modelos seguindo o mesmo padrão do auth.test.js
+
 jest.mock('../../src/models', () => {
   return {
     Usuario: {
@@ -41,7 +41,7 @@ describe('Cardapio Endpoints', () => {
   beforeAll(async () => {
     console.log('🔧 Configurando usuário admin para os testes...');
     
-    // Criar usuário admin no mock (igual ao auth.test.js)
+    
     const adminUser = {
       id: 1,
       nome: 'Admin Teste',
@@ -55,13 +55,13 @@ describe('Cardapio Endpoints', () => {
     };
     mockUsers.set('admin@test.com', adminUser);
 
-    // Configurar mock do Usuario.findOne para login
+    
     Usuario.findOne.mockImplementation(({ where }) => {
       const user = Array.from(mockUsers.values()).find(u => u.email === where.email);
       return Promise.resolve(user || null);
     });
 
-    // Fazer login real para pegar o token
+    
     const response = await request(app)
       .post('/api/auth/login')
       .send({
@@ -81,10 +81,10 @@ describe('Cardapio Endpoints', () => {
   });
 
   beforeEach(async () => {
-    // Limpar mocks
+    
     jest.clearAllMocks();
 
-    // Reconfigurar mock do usuário admin para cada teste
+    
     const adminUser = {
       id: 1,
       nome: 'Admin Teste',
@@ -95,7 +95,7 @@ describe('Cardapio Endpoints', () => {
       verificarSenha: jest.fn().mockResolvedValue(true)
     };
 
-    // Configurar categoria mock
+    
     categoria = {
       id: 1,
       nome: 'Lanches',
@@ -103,7 +103,7 @@ describe('Cardapio Endpoints', () => {
       ativo: true
     };
 
-    // Setup mocks baseado no padrão do auth.test.js
+    
     Usuario.findOne.mockImplementation(({ where }) => {
       if (where.email === 'admin@test.com') {
         return Promise.resolve(adminUser);
@@ -127,7 +127,7 @@ describe('Cardapio Endpoints', () => {
     Categoria.destroy.mockResolvedValue(null);
     Cardapio.destroy.mockResolvedValue(null);
 
-    // Mock de produtos
+    
     const mockProdutos = [
       {
         id: 1,
@@ -211,7 +211,7 @@ describe('Cardapio Endpoints', () => {
         tempo_preparo: 25
       };
 
-      // Mock da criação
+      
       const novoItem = { id: 3, ...itemData };
       Cardapio.create.mockResolvedValue(novoItem);
 
@@ -253,7 +253,7 @@ describe('Cardapio Endpoints', () => {
     it('deve validar dados obrigatórios', async () => {
       console.log('🔍 Testando validação com token:', authToken ? 'PRESENTE' : 'AUSENTE');
       
-      // Nome ausente
+      
       const response1 = await request(app)
         .post('/api/cardapio')
         .set('Authorization', `Bearer ${authToken}`)
@@ -265,7 +265,7 @@ describe('Cardapio Endpoints', () => {
       console.log('📋 Teste sem nome - Status:', response1.status);
       expect(response1.status).toBe(400);
 
-      // Preço ausente
+      
       const response2 = await request(app)
         .post('/api/cardapio')
         .set('Authorization', `Bearer ${authToken}`)
@@ -279,7 +279,7 @@ describe('Cardapio Endpoints', () => {
     });
   });
 
-  // Debug test para verificar o token
+  
   describe('🔧 Debug Token', () => {
     it('deve verificar se o token foi obtido corretamente', () => {
       console.log('🔐 Verificando token...');
@@ -308,7 +308,7 @@ describe('Cardapio Endpoints', () => {
       console.log('🧪 Body:', response.body);
       console.log('🧪 Headers enviados:', { Authorization: `Bearer ${authToken}` });
 
-      // Se ainda der 401, algo está errado com o middleware
+      
       if (response.status === 401) {
         console.log('❌ DIAGNÓSTICO: O middleware não está validando o token');
         console.log('💡 Possíveis causas:');

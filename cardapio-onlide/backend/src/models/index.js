@@ -1,14 +1,14 @@
 const sequelize = require('../config/database');
 const { Op } = require('sequelize');
 
-// Importar modelos
+
 const Usuario = require('./Usuario');
 const Categoria = require('./Categoria');
 const Cardapio = require('./Cardapio');
 const Pedido = require('./Pedido');
 const ItemPedido = require('./ItemPedido');
 
-// ==================== RELACIONAMENTOS ====================
+
 Categoria.hasMany(Cardapio, { 
   foreignKey: 'categoria_id', 
   as: 'itens' 
@@ -36,16 +36,16 @@ ItemPedido.belongsTo(Cardapio, {
   as: 'produto' 
 });
 
-// ==================== INICIALIZAÇÃO DO BANCO ====================
+
 const initDatabase = async () => {
   try {
     console.log('🔄 Conectando ao banco de dados...');
     
-    // Testar conexão
+    
     await sequelize.authenticate();
     console.log('✅ Conexão com banco estabelecida');
     
-    // Sincronizar modelos (apenas em desenvolvimento)
+    
     if (process.env.NODE_ENV === 'development') {
       await sequelize.sync({ 
         alter: true,
@@ -53,10 +53,10 @@ const initDatabase = async () => {
       });
       console.log('📊 Modelos sincronizados com banco');
       
-      // Executar seeds se necessário
+      
       await runSeeds();
     } else {
-      // Em produção, apenas verificar se tabelas existem
+      
       await sequelize.sync({ 
         alter: false,
         logging: false 
@@ -67,7 +67,7 @@ const initDatabase = async () => {
   } catch (error) {
     console.error('❌ Erro ao inicializar banco:', error);
     
-    // Em desenvolvimento, tentar criar banco se não existir
+    
     if (process.env.NODE_ENV === 'development') {
       console.log('⚠️  Tentando criar estrutura do banco...');
       try {
@@ -81,10 +81,10 @@ const initDatabase = async () => {
   }
 };
 
-// ==================== SEEDS (DADOS INICIAIS) ====================
+
 const runSeeds = async () => {
   try {
-    // Verificar se já existem dados
+    
     const userCount = await Usuario.count();
     const categoryCount = await Categoria.count();
     
@@ -103,7 +103,7 @@ const runSeeds = async () => {
     if (categoryCount === 0) {
       console.log('🌱 Criando categorias e produtos...');
       
-      // Criar categorias
+      
       const categorias = await Categoria.bulkCreate([
         { nome: 'Lanches', descricao: 'Hambúrguers e sanduíches', ativo: true },
         { nome: 'Pizzas', descricao: 'Pizzas tradicionais e especiais', ativo: true },
@@ -112,9 +112,9 @@ const runSeeds = async () => {
         { nome: 'Pratos Principais', descricao: 'Refeições completas', ativo: true }
       ], { returning: true });
       
-      // Criar produtos
+      
       await Cardapio.bulkCreate([
-        // Lanches
+        
         {
           nome: 'X-Burger Clássico',
           descricao: 'Hambúrguer com carne 180g, queijo, alface, tomate e maionese',
@@ -132,7 +132,7 @@ const runSeeds = async () => {
           tempo_preparo: 18
         },
         
-        // Pizzas
+        
         {
           nome: 'Pizza Margherita',
           descricao: 'Molho de tomate, mussarela de búfala e manjericão fresco',
@@ -150,7 +150,7 @@ const runSeeds = async () => {
           tempo_preparo: 25
         },
         
-        // Bebidas
+        
         {
           nome: 'Coca-Cola 350ml',
           descricao: 'Refrigerante gelado',
@@ -168,7 +168,7 @@ const runSeeds = async () => {
           tempo_preparo: 5
         },
         
-        // Sobremesas
+        
         {
           nome: 'Pudim de Leite',
           descricao: 'Pudim caseiro com calda de caramelo',
@@ -186,7 +186,7 @@ const runSeeds = async () => {
           tempo_preparo: 8
         },
         
-        // Pratos Principais
+        
         {
           nome: 'Lasanha Bolonhesa',
           descricao: 'Lasanha tradicional com molho bolonhesa e queijo',
@@ -215,7 +215,7 @@ const runSeeds = async () => {
   }
 };
 
-// ==================== UTILITÁRIOS ====================
+
 const closeConnection = async () => {
   try {
     await sequelize.close();
@@ -225,7 +225,7 @@ const closeConnection = async () => {
   }
 };
 
-// Tratar encerramento graceful
+
 process.on('SIGINT', async () => {
   console.log('\n🛑 Encerrando aplicação...');
   await closeConnection();
@@ -238,11 +238,11 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// ==================== INICIALIZAR ====================
-// Executar inicialização quando o módulo for carregado
+
+
 initDatabase();
 
-// ==================== EXPORTS ====================
+
 module.exports = {
   sequelize,
   Usuario,

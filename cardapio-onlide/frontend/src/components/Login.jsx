@@ -16,7 +16,7 @@ function Login({ onLogin, onSwitchToRegister, loading }) {
       [name]: value
     }));
     
-    // Limpar erro do campo quando usuário digita
+    
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -55,7 +55,7 @@ function Login({ onLogin, onSwitchToRegister, loading }) {
     try {
       await onLogin(formData.email, formData.password);
     } catch (error) {
-      // Error is handled by context/toast
+      
       console.error('Login error:', error);
     }
   };

@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 
-// Usar banco em memória para testes
+
 const testSequelize = new Sequelize('sqlite::memory:', {
   dialect: 'sqlite',
   logging: false
@@ -14,7 +14,7 @@ const initializeTestModels = async () => {
   }
 
   try {
-    // Definir modelos inline para testes
+    
     const Usuario = testSequelize.define('Usuario', {
       id: {
         type: Sequelize.INTEGER,
@@ -94,19 +94,19 @@ const initializeTestModels = async () => {
       }
     });
 
-    // Relacionamentos
+    
     Categoria.hasMany(Cardapio, { foreignKey: 'categoria_id', as: 'itens' });
     Cardapio.belongsTo(Categoria, { foreignKey: 'categoria_id', as: 'categoria' });
 
-    // Mock do hash de senha
+    
     Usuario.prototype.verificarSenha = async function(senha) {
-      return this.senha === senha; // Simplificado para teste
+      return this.senha === senha; 
     };
 
-    // Sincronizar tabelas
+    
     await testSequelize.sync({ force: true });
 
-    // Exportar para uso nos testes
+    
     global.testModels = {
       sequelize: testSequelize,
       Usuario,
@@ -139,7 +139,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   if (global.testModels) {
-    // Limpar dados entre testes
+    
     await global.testModels.Cardapio.destroy({ where: {} });
     await global.testModels.Categoria.destroy({ where: {} });
     await global.testModels.Usuario.destroy({ where: {} });

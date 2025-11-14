@@ -31,7 +31,7 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
-      # ============ FRONTEND ============
+      
       - name: 🏗️ Build Frontend
         run: |
           docker build \
@@ -54,7 +54,7 @@ jobs:
             --allow-unauthenticated \
             --port 80
 
-      # ============ BACKEND ============
+      
       - name: 🏗️ Build Backend
         run: |
           docker build \

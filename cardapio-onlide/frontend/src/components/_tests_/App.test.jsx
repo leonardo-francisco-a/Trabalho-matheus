@@ -3,7 +3,7 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../tests/test-utils';
 import App from '../../App';
 
-// Mock das APIs
+
 vi.mock('../services/api', () => ({
   authService: {
     login: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock('../services/api', () => ({
   },
 }));
 
-// Mock do react-hot-toast
+
 vi.mock('react-hot-toast', () => ({
   default: {
     success: vi.fn(),
@@ -53,14 +53,14 @@ describe('App Integration', () => {
   });
 
   it('deve mostrar loading de autenticação', () => {
-    // Simular token no localStorage
+    
     localStorage.setItem('token', 'test-token');
     localStorage.setItem('user', JSON.stringify({ nome: 'Test User' }));
 
     render(<App />);
 
-    // Como temos token, deve mostrar o app principal
-    // Mas inicialmente pode mostrar loading
+    
+    
     expect(screen.queryByText(/verificando autenticação/i)).toBeDefined();
   });
 });

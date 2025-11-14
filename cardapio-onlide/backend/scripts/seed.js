@@ -4,14 +4,14 @@ async function seed() {
   try {
     console.log('🌱 Executando seeds...');
 
-    // Verificar se já existem dados
+    
     const userCount = await Usuario.count();
     if (userCount > 0) {
       console.log('⚠️ Dados já existem, pulando seeds...');
       return;
     }
 
-    // Criar admin padrão
+    
     await Usuario.create({
       nome: 'Administrador',
       email: 'admin@cardapio.com',
@@ -21,7 +21,7 @@ async function seed() {
 
     console.log('✅ Usuário admin criado: admin@cardapio.com / admin123');
 
-    // Criar categorias
+    
     const categorias = await Categoria.bulkCreate([
       { nome: 'Lanches', descricao: 'Hambúrguers e sanduíches' },
       { nome: 'Pizzas', descricao: 'Pizzas tradicionais e especiais' },
@@ -31,7 +31,7 @@ async function seed() {
 
     console.log('✅ Categorias criadas');
 
-    // Criar itens do cardápio
+    
     await Cardapio.bulkCreate([
       {
         nome: 'X-Burger Clássico',

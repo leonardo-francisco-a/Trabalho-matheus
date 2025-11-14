@@ -21,16 +21,16 @@ const ProductGrid = ({
     'Pratos Principais': '🍽️'
   };
 
-  // Função para filtrar e buscar produtos
+  
   const filteredProducts = useMemo(() => {
     let filtered = produtos;
 
-    // Filtrar por categoria
+    
     if (selectedCategory?.id !== 'all' && selectedCategory?.nome !== 'Todos') {
       filtered = filtered.filter(produto => produto.categoria_id === selectedCategory?.id);
     }
 
-    // Filtrar por termo de busca
+    
     if (searchTerm) {
       const term = searchTerm.toLowerCase().trim();
       filtered = filtered.filter(produto => 
@@ -40,7 +40,7 @@ const ProductGrid = ({
       );
     }
 
-    // Aplicar filtros avançados
+    
     if (filters.disponivel && filters.disponivel !== 'all') {
       const isAvailable = filters.disponivel === 'true';
       filtered = filtered.filter(produto => produto.disponivel === isAvailable);
@@ -62,7 +62,7 @@ const ProductGrid = ({
       filtered = filtered.filter(produto => produto.preco <= maxPrice);
     }
 
-    // Ordenar por nome
+    
     return filtered.sort((a, b) => a.nome.localeCompare(b.nome));
   }, [produtos, selectedCategory, searchTerm, filters]);
 

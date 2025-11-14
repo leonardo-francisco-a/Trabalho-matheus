@@ -11,19 +11,19 @@ const login = async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    // Verificar se usuário existe
+    
     const usuario = await Usuario.findOne({ where: { email, ativo: true } });
     if (!usuario) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    // Verificar senha
+    
     const senhaValida = await usuario.verificarSenha(senha);
     if (!senhaValida) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    // Gerar token
+    
     const token = gerarToken(usuario.id);
 
     res.json({
@@ -50,7 +50,7 @@ const register = async (req, res) => {
       email,
       senha,
       telefone,
-      tipo: 'admin' // Por padrão, registro cria admin
+      tipo: 'admin' 
     });
 
     const token = gerarToken(usuario.id);

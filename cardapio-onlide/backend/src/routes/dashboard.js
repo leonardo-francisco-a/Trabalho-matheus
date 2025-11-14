@@ -5,14 +5,14 @@ const { Op } = require('sequelize');
 
 const router = express.Router();
 
-// Estatísticas gerais
+
 router.get('/stats', auth, adminOnly, async (req, res) => {
   try {
     const hoje = new Date();
     const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
     const fimHoje = new Date(inicioHoje.getTime() + 24 * 60 * 60 * 1000);
 
-    // Pedidos de hoje
+    
     const pedidosHoje = await Pedido.count({
       where: {
         createdAt: {
@@ -21,7 +21,7 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
       }
     });
 
-    // Faturamento de hoje
+    
     const faturamentoHoje = await Pedido.sum('total', {
       where: {
         createdAt: {
@@ -33,7 +33,7 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
       }
     }) || 0;
 
-    // Pedidos por status
+    
     const pedidosPorStatus = await Pedido.findAll({
       attributes: [
         'status',
@@ -42,12 +42,12 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
       group: ['status']
     });
 
-    // Total de itens no cardápio
+    
     const totalItensCardapio = await Cardapio.count({
       where: { disponivel: true }
     });
 
-    // Pedidos pendentes (recebido + preparando)
+    
     const pedidosPendentes = await Pedido.count({
       where: {
         status: {
@@ -71,7 +71,7 @@ router.get('/stats', auth, adminOnly, async (req, res) => {
   }
 });
 
-// Relatório de vendas
+
 router.get('/vendas', auth, adminOnly, async (req, res) => {
   try {
     const { data_inicio, data_fim } = req.query;
@@ -88,7 +88,7 @@ router.get('/vendas', auth, adminOnly, async (req, res) => {
       };
     }
 
-    // Faturamento por dia
+    
     const vendasPorDia = await Pedido.findAll({
       attributes: [
         [Pedido.sequelize.fn('DATE', Pedido.sequelize.col('createdAt')), 'data'],
@@ -100,7 +100,7 @@ router.get('/vendas', auth, adminOnly, async (req, res) => {
       order: [[Pedido.sequelize.fn('DATE', Pedido.sequelize.col('createdAt')), 'DESC']]
     });
 
-    // Produtos mais vendidos
+    
     const produtosMaisVendidos = await ItemPedido.findAll({
       attributes: [
         'cardapio_id',

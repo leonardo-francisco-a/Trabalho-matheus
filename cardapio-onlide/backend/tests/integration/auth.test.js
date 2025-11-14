@@ -1,10 +1,10 @@
 const request = require('supertest');
 const app = require('../../src/app');
 
-// Mock simples para não depender do banco real
+
 const mockUsers = new Map();
 
-// Override dos modelos para usar mock
+
 jest.mock('../../src/models', () => {
   return {
     Usuario: {
@@ -19,11 +19,11 @@ const { Usuario } = require('../../src/models');
 
 describe('Auth Endpoints', () => {
   beforeEach(() => {
-    // Limpar mocks
+    
     jest.clearAllMocks();
     mockUsers.clear();
     
-    // Setup mock behaviors
+    
     Usuario.destroy.mockResolvedValue(null);
     Usuario.findOne.mockImplementation(({ where }) => {
       const user = Array.from(mockUsers.values()).find(u => u.email === where.email);
@@ -80,7 +80,7 @@ describe('Auth Endpoints', () => {
         senha: '123456'
       };
 
-      // Simular usuário já existente
+      
       mockUsers.set(userData.email, { ...userData, id: 1 });
 
       const response = await request(app)
@@ -96,7 +96,7 @@ describe('Auth Endpoints', () => {
     });
 
     it('deve validar dados obrigatórios', async () => {
-      // Nome ausente
+      
       await request(app)
         .post('/api/auth/register')
         .send({
@@ -105,7 +105,7 @@ describe('Auth Endpoints', () => {
         })
         .expect(400);
 
-      // Email ausente
+      
       await request(app)
         .post('/api/auth/register')
         .send({
@@ -114,7 +114,7 @@ describe('Auth Endpoints', () => {
         })
         .expect(400);
 
-      // Senha ausente
+      
       await request(app)
         .post('/api/auth/register')
         .send({
@@ -153,7 +153,7 @@ describe('Auth Endpoints', () => {
 
   describe('POST /api/auth/login', () => {
     beforeEach(() => {
-      // Criar usuário para testes de login
+      
       const testUser = {
         id: 1,
         nome: 'Test User',
@@ -193,7 +193,7 @@ describe('Auth Endpoints', () => {
     it('deve rejeitar credenciais inválidas', async () => {
       Usuario.findOne.mockResolvedValue(null);
 
-      // Email inexistente
+      
       await request(app)
         .post('/api/auth/login')
         .send({
@@ -202,7 +202,7 @@ describe('Auth Endpoints', () => {
         })
         .expect(401);
 
-      // Senha incorreta - simular usuário encontrado mas senha errada
+      
       const user = mockUsers.get('test@teste.com');
       user.verificarSenha.mockResolvedValue(false);
       Usuario.findOne.mockResolvedValue(user);
@@ -217,13 +217,13 @@ describe('Auth Endpoints', () => {
     });
 
     it('deve validar campos obrigatórios', async () => {
-      // Email ausente
+      
       await request(app)
         .post('/api/auth/login')
         .send({ senha: '123456' })
         .expect(400);
 
-      // Senha ausente
+      
       await request(app)
         .post('/api/auth/login')
         .send({ email: 'test@teste.com' })

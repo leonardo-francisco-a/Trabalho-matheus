@@ -55,7 +55,7 @@ const ProductModal = ({ produto, isOpen, onClose, onAddToCart }) => {
       observacoes
     };
     
-    // Adicionar múltiplas vezes se quantidade > 1
+    
     for (let i = 0; i < quantity; i++) {
       onAddToCart({ ...produto, observacoes });
     }

@@ -20,32 +20,32 @@ const Dashboard = ({ user }) => {
     loadDashboardData();
   }, [state.pedidos]);
 
-  // Calcular estatísticas baseadas no estado real
+  
   const calculateStats = () => {
     const pedidos = state.pedidos || [];
     const produtos = state.produtos || [];
     
-    // Data de hoje
+    
     const hoje = new Date();
     const hojeStr = hoje.toDateString();
     
-    // Pedidos de hoje
+    
     const pedidosHoje = pedidos.filter(pedido => {
       const dataPedido = new Date(pedido.createdAt);
       return dataPedido.toDateString() === hojeStr;
     });
     
-    // Faturamento de hoje
+    
     const faturamentoHoje = pedidosHoje
       .filter(pedido => pedido.status !== 'cancelado')
       .reduce((sum, pedido) => sum + parseFloat(pedido.total || 0), 0);
     
-    // Pedidos pendentes
+    
     const pedidosPendentes = pedidos.filter(pedido => 
       ['recebido', 'preparando'].includes(pedido.status)
     ).length;
     
-    // Contagem por status
+    
     const statusCount = pedidos.reduce((acc, pedido) => {
       acc[pedido.status] = (acc[pedido.status] || 0) + 1;
       return acc;
@@ -69,21 +69,21 @@ const Dashboard = ({ user }) => {
     try {
       setLoading(true);
       
-      // Tentar carregar dados reais da API
+      
       try {
         const statsData = await dashboardService.obterEstatisticas();
         setStats(statsData);
       } catch (error) {
         console.warn('API indisponível, calculando stats do estado local');
-        // Usar dados calculados do estado local
+        
         const localStats = calculateStats();
         setStats(localStats);
       }
       
-      // Definir pedidos recentes do estado ou criar mock
+      
       const pedidos = state.pedidos || [];
       if (pedidos.length > 0) {
-        // Usar pedidos reais do estado
+        
         const pedidosRecentes = pedidos
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
           .slice(0, 5)
@@ -93,7 +93,7 @@ const Dashboard = ({ user }) => {
           }));
         setRecentOrders(pedidosRecentes);
       } else {
-        // Se não há pedidos reais, usar alguns dados de exemplo
+        
         setRecentOrders([]);
       }
       
@@ -150,9 +150,9 @@ const Dashboard = ({ user }) => {
     });
   };
 
-  // Calcular tendência comparada com ontem
+  
   const getTrend = (current, type) => {
-    // Por simplicidade, simular uma tendência
+    
     const trends = {
       pedidos: Math.random() > 0.5 ? '+5' : '-2',
       faturamento: Math.random() > 0.5 ? '+12%' : '-5%'

@@ -1,13 +1,13 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-// Configurar banco em memória para testes
+
 const sequelize = new Sequelize('sqlite::memory:', {
   dialect: 'sqlite',
   logging: false
 });
 
-// Definir modelo Usuario para teste
+
 const Usuario = sequelize.define('Usuario', {
   id: {
     type: DataTypes.INTEGER,
@@ -81,7 +81,7 @@ describe('Usuario Model', () => {
   });
 
   beforeEach(async () => {
-    // Limpar tabela antes de cada teste
+    
     await Usuario.destroy({ where: {} });
   });
 
@@ -99,8 +99,8 @@ describe('Usuario Model', () => {
       expect(usuario.nome).toBe(userData.nome);
       expect(usuario.email).toBe(userData.email);
       expect(usuario.tipo).toBe(userData.tipo);
-      expect(usuario.senha).not.toBe(userData.senha); // Deve ser hash
-      expect(usuario.ativo).toBe(true); // Default
+      expect(usuario.senha).not.toBe(userData.senha); 
+      expect(usuario.ativo).toBe(true); 
     });
 
     it('deve validar email único', async () => {
@@ -113,7 +113,7 @@ describe('Usuario Model', () => {
 
       await Usuario.create(userData);
 
-      // Tentar criar outro com mesmo email
+      
       await expect(Usuario.create({
         ...userData,
         nome: 'Maria Silva'
@@ -121,19 +121,19 @@ describe('Usuario Model', () => {
     });
 
     it('deve validar campos obrigatórios', async () => {
-      // Nome obrigatório
+      
       await expect(Usuario.create({
         email: 'test@teste.com',
         senha: '123456'
       })).rejects.toThrow();
 
-      // Email obrigatório
+      
       await expect(Usuario.create({
         nome: 'Test User',
         senha: '123456'
       })).rejects.toThrow();
 
-      // Senha obrigatória
+      
       await expect(Usuario.create({
         nome: 'Test User',
         email: 'test@teste.com'

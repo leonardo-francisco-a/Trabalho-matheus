@@ -74,14 +74,14 @@ it('deve validar formato do email', async () => {
   const passwordInput = screen.getByLabelText(/senha/i);
   const form = screen.getByRole('button', { name: /entrar/i }).closest('form');
 
-  // Preencha os campos
+  
   fireEvent.change(emailInput, { target: { value: 'email-invalido' } });
   fireEvent.change(passwordInput, { target: { value: '123456' } });
   
-  // Submit o formulário
+  
   fireEvent.submit(form);
 
-  // Use uma busca mais flexível que funciona
+  
   await waitFor(() => {
     const errorElements = screen.queryAllByText(/email.*inválido/i);
     expect(errorElements.length).toBeGreaterThan(0);

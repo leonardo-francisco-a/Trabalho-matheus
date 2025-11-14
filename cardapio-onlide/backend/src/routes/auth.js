@@ -6,7 +6,7 @@ const { handleValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
 
-// Validações
+
 const loginValidation = [
   body('email').isEmail().withMessage('Email inválido'),
   body('senha').isLength({ min: 6 }).withMessage('Senha deve ter pelo menos 6 caracteres'),
@@ -21,7 +21,7 @@ const registerValidation = [
   handleValidationErrors
 ];
 
-// Rotas
+
 router.post('/login', loginValidation, login);
 router.post('/register', registerValidation, register);
 router.get('/me', auth, me);

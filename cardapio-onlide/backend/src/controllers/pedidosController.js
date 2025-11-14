@@ -15,7 +15,7 @@ const criarPedido = async (req, res) => {
       itens
     } = req.body;
 
-    // Calcular total
+    
     let total = 0;
     const itensComPreco = [];
 
@@ -42,7 +42,7 @@ const criarPedido = async (req, res) => {
       });
     }
 
-    // Criar pedido
+    
     const pedido = await Pedido.create({
       cliente_nome,
       cliente_telefone,
@@ -53,7 +53,7 @@ const criarPedido = async (req, res) => {
       total: total.toFixed(2)
     }, { transaction });
 
-    // Criar itens do pedido
+    
     for (const item of itensComPreco) {
       await ItemPedido.create({
         pedido_id: pedido.id,
@@ -63,7 +63,7 @@ const criarPedido = async (req, res) => {
 
     await transaction.commit();
 
-    // Buscar pedido completo
+    
     const pedidoCompleto = await Pedido.findByPk(pedido.id, {
       include: [{
         model: ItemPedido,
